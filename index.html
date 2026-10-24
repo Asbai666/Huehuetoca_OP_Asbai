@@ -380,7 +380,7 @@ async function api(action, params = {}, body = null) {
     return j;
   } catch (e) {
     if (e.name === 'AbortError') throw new Error('Tiempo de espera agotado. Revisa tu señal.');
-    if (e instanceof TypeError) throw new Error('Sin conexión con el servicio. Revisa la URL en Ajustes o tu señal.');
+    if (e instanceof TypeError) throw new Error(navigator.onLine === false ? 'Sin señal de internet.' : 'Google no respondió al servicio. Ve a ⚙️ Ajustes > Probar conexión para ver la causa.');
     throw e;
   } finally { clearTimeout(to); }
 }
@@ -1044,11 +1044,21 @@ async function subirBitacora() {
 /* ======================== AJUSTES ======================== */
 function fillCfg() { $('#cfgNombre').value = cfg.nombre; $('#cfgWa').value = cfg.waNum; $('#cfgUrl').value = cfg.apiUrl; $('#cfgToken').value = cfg.token; $('#cfgMsg').innerHTML = ''; }
 function leerCfg() { cfg = { admin: cfg.admin, nombre: $('#cfgNombre').value.trim(), waNum: $('#cfgWa').value.trim(), apiUrl: $('#cfgUrl').value.trim(), token: $('#cfgToken').value.trim() }; LSset('d29_cfg', cfg); }
-$('#btnSaveCfg').onclick = () => { leerCfg(); $('#cfgMsg').innerHTML = `<div class="note ok">Ajustes guardados en este teléfono${demo() ? ' (sin URL: modo demo)' : ''}.</div>`; };
+function urlValida(u) { return !u || /^https:\/\/script\.google\.com\/(a\/macros\/[^/]+|macros)\/s\/[\w-]{20,}\/exec\/?$/.test(u); }
+const CHECK_URL = `<div class="note warn" style="text-align:left">Revisa en Apps Script:<br>
+  1. Ejecutaste la función <b>setup</b> y aceptaste los permisos (deben aparecer las pestañas Base_OS y Evidencias en la hoja).<br>
+  2. Implementar > Gestionar implementaciones: tipo <b>Aplicación web</b>, Ejecutar como <b>Yo</b>, Acceso <b>Cualquier usuario</b>.<br>
+  3. Si cambiaste el código, edita la implementación y elige <b>Nueva versión</b>.<br>
+  4. Abre la URL en el navegador: debe mostrar <code>{"ok":true,...}</code>. Si pide iniciar sesión o permisos, falta el paso 1 o 2.</div>`;
+$('#btnSaveCfg').onclick = () => { if (!urlValida($('#cfgUrl').value.trim())) { $('#cfgMsg').innerHTML = `<div class="note err">La URL debe ser la de la aplicación web: https://script.google.com/macros/s/…/exec (no la del editor ni la de la hoja).</div>`; return; } leerCfg(); $('#cfgMsg').innerHTML = `<div class="note ok">Ajustes guardados en este teléfono${demo() ? ' (sin URL: modo demo)' : ''}.</div>`; };
 $('#btnPing').onclick = async () => {
   leerCfg(); $('#cfgMsg').innerHTML = `<div class="note info">Probando…</div>`;
   try { const r = await api('ping'); $('#cfgMsg').innerHTML = `<div class="note ok">Conectado: ${esc(r.app)}${r.hora ? ' · ' + esc(r.hora) : ''}</div>`; }
-  catch (e) { $('#cfgMsg').innerHTML = `<div class="note err">${esc(e.message)}</div>`; }
+  catch (e) {
+    const u = cfg.apiUrl;
+    $('#cfgMsg').innerHTML = `<div class="note err">${esc(e.message)}</div>` + (!urlValida(u) ? `<div class="note err">La URL no es de una aplicación web (debe terminar en /exec).</div>` : '')
+      + CHECK_URL + (u ? `<a class="btn sec block" style="margin-top:8px" href="${esc(u)}" target="_blank" rel="noopener">Abrir la URL en el navegador</a>` : '');
+  }
 };
 
 /* ======================== INICIO ======================== */
