@@ -1,0 +1,977 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#4a1f70">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Evidencias D29 Huehuetoca</title>
+<script src="https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/full.umd.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  /* Colores del tema: ajústalos al manual de marca si lo necesitas */
+  --tp:#5b2a86; --tp-d:#3d1660; --tp2:#e6007e; --tp-l:#f0e9f7;
+  --bg:#f5f2f9; --card:#fff; --ink:#1d1630; --mute:#6b6280; --line:#e4ddee;
+  --ok:#0f7b55; --warn:#a85b00; --err:#c0262d; --wa:#1fa855; --r:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-tap-highlight-color:transparent;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+a{color:var(--tp)}
+[hidden]{display:none!important}
+
+/* Encabezado */
+.top{position:sticky;top:0;z-index:30;background:linear-gradient(115deg,var(--tp-d),var(--tp) 55%,var(--tp2));color:#fff;padding:calc(10px + env(safe-area-inset-top)) 12px 10px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 12px rgba(40,0,60,.25)}
+.top .back{background:rgba(255,255,255,.18);border:0;color:#fff;width:38px;height:38px;border-radius:10px;font-size:20px;flex:0 0 auto}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.brand img{height:34px;width:auto;flex:0 0 auto}
+.brand .tx{min-width:0}
+.brand .tx b{display:block;font-size:17px;letter-spacing:.3px;line-height:1.1}
+.brand .tx span{display:block;font-size:12px;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top .cfg{background:transparent;border:0;color:#fff;font-size:20px;width:38px;height:38px}
+
+main{max-width:640px;margin:0 auto;padding:14px}
+.hero{background:var(--card);border-radius:var(--r);padding:14px 16px;border:1px solid var(--line);margin-bottom:12px;display:flex;align-items:center;gap:12px}
+.hero p{margin:0;font-size:13.5px;color:var(--mute)}
+.hero b{color:var(--ink)}
+.sect{font-size:12px;font-weight:800;letter-spacing:1px;color:var(--mute);margin:18px 2px 8px;text-transform:uppercase}
+
+/* Menú */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 12px;min-height:98px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:6px;font:inherit;font-weight:800;font-size:15px;color:var(--ink);text-align:left;box-shadow:0 1px 2px rgba(60,20,90,.06);position:relative;overflow:hidden}
+.tile:active{transform:scale(.98)}
+.tile::after{content:"";position:absolute;right:-18px;top:-18px;width:56px;height:56px;border-radius:50%;background:var(--tp-l)}
+.tile .ic{font-size:26px;position:relative;z-index:1}
+.tile small{display:block;font-weight:500;color:var(--mute);font-size:12px}
+.tile.wide{grid-column:1/-1;min-height:74px;flex-direction:row;align-items:center;justify-content:flex-start;gap:12px}
+.tile.pv{background:linear-gradient(120deg,var(--tp),var(--tp2));color:#fff;border:0}
+.tile.pv small{color:#fbe6f3}.tile.pv::after{background:rgba(255,255,255,.15)}
+.tile.q{border-color:var(--tp);border-width:1.5px}
+
+/* Tarjetas y formularios */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:0 0 12px}
+.card h3{margin:0 0 6px;font-size:15.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tag{font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:3px 7px;border-radius:999px;background:#fde7f2;color:var(--tp2)}
+.tag.opt{background:#eee;color:#666}
+.tag.lock{background:#e6f4ee;color:var(--ok)}
+.hint{font-size:13px;color:var(--mute);margin:0 0 10px}
+label{display:block;font-size:13px;font-weight:700;margin:12px 0 5px;color:#4b4260}
+label .rq{color:var(--tp2)}
+input,select,textarea{width:100%;font:inherit;font-size:16px;padding:12px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);-webkit-appearance:none;appearance:none}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--tp) 50%),linear-gradient(135deg,var(--tp) 50%,transparent 50%);background-position:calc(100% - 18px) 52%,calc(100% - 12px) 52%;background-size:6px 6px;background-repeat:no-repeat;padding-right:32px}
+textarea{min-height:84px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--tp);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+.err{border-color:var(--err)!important;box-shadow:0 0 0 3px rgba(192,38,45,.1)!important}
+.errmsg{color:var(--err);font-size:13px;font-weight:600;margin-top:6px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:11px;padding:12px 14px;font:inherit;font-weight:800;font-size:15px;background:var(--tp);color:#fff;min-height:48px;text-decoration:none;cursor:pointer}
+.btn:active{filter:brightness(.92)}
+.btn.sec{background:var(--tp-l);color:var(--tp)}
+.btn.wa{background:var(--wa)}
+.btn.ghost{background:transparent;color:var(--tp);border:1.5px solid var(--line)}
+.btn.sm{min-height:38px;padding:8px 12px;font-size:13.5px}
+.btn.block{width:100%}
+.btn.big{min-height:56px;font-size:16.5px}
+.btn:disabled{opacity:.5}
+.row{display:flex;gap:8px;margin-top:10px}
+.row>*{flex:1}
+.row>.shrink{flex:0 0 auto}
+
+.osbox{display:flex;border:1.5px solid var(--line);border-radius:11px;overflow:hidden;background:#fff}
+.osbox:focus-within{border-color:var(--tp);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+.osbox span{background:var(--tp);color:#fff;font-weight:900;padding:0 12px;display:flex;align-items:center;font-size:18px;letter-spacing:1px}
+.osbox input{border:0;border-radius:0;box-shadow:none!important;font-size:22px;font-weight:800;letter-spacing:3px;padding:12px 10px}
+.osbox.err{border-color:var(--err)}
+
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:6px 12px;font-size:14px;margin:10px 0 0}
+.kv dt{color:var(--mute)}
+.kv dd{margin:0;font-weight:700;word-break:break-word}
+.basecard{background:var(--tp-l);border-radius:11px;padding:10px 12px;margin-top:10px}
+.basecard .h{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:800;color:var(--tp)}
+.note{border-radius:10px;padding:10px 12px;font-size:13.5px;margin-top:10px;font-weight:600}
+.note.warn{background:#fff3e0;color:var(--warn)}
+.note.ok{background:#e6f4ee;color:var(--ok)}
+.note.err{background:#fdecec;color:var(--err)}
+.note.info{background:var(--tp-l);color:var(--tp-d)}
+
+.photo{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:10px;background:#faf8fc}
+.photo img{width:100%;display:block;background:#222}
+.photo .body{padding:10px}
+.photo .kv{font-size:12.5px;margin:0}
+.photo .lockbar{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;color:var(--ok);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
+.alert{background:#fff3e0;color:var(--warn);border-radius:8px;padding:7px 9px;font-size:12.5px;font-weight:700;margin-top:6px}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{background:var(--tp-l);color:var(--tp-d);border-radius:999px;padding:5px 5px 5px 12px;font-weight:800;font-size:14px;display:flex;align-items:center;gap:6px;max-width:100%;word-break:break-all}
+.chip button{border:0;background:#fff;color:var(--err);border-radius:50%;width:26px;height:26px;font-size:14px;flex:0 0 auto}
+.chip i{font-style:normal;color:var(--mute);font-weight:700;font-size:12px}
+
+.seg{display:flex;background:var(--tp-l);border-radius:11px;padding:4px;gap:4px}
+.seg button{flex:1;border:0;background:transparent;padding:11px 6px;font:inherit;font-weight:800;font-size:14px;border-radius:8px;color:var(--tp)}
+.seg button.on{background:var(--tp);color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.qrval{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;background:#f3f0f7;border-radius:8px;padding:10px;word-break:break-all;margin-top:10px}
+
+pre.wa{white-space:pre-wrap;word-break:break-word;background:#e8f8ee;border:1px solid #c9ecd6;border-radius:12px;padding:12px;font:14px/1.45 system-ui,-apple-system,sans-serif;max-height:55vh;overflow:auto;margin:0}
+
+/* Consulta */
+.res{border:1px solid var(--line);border-radius:12px;margin-top:10px;overflow:hidden;background:#fff}
+.res>summary{list-style:none;padding:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer}
+.res>summary::-webkit-details-marker{display:none}
+.res>summary b{font-size:16px}
+.res>summary small{color:var(--mute);display:block;font-size:12px}
+.res .cnt{background:var(--tp);color:#fff;border-radius:999px;padding:3px 9px;font-size:12px;font-weight:800;white-space:nowrap}
+.res .cnt.zero{background:#ddd;color:#666}
+.res .in{padding:0 12px 12px}
+.cap{border-top:1px dashed var(--line);padding-top:10px;margin-top:10px}
+.cap .hd{display:flex;justify-content:space-between;gap:6px;font-size:13px}
+.cap .hd b{color:var(--tp)}
+.thumbs{display:flex;gap:6px;overflow-x:auto;margin-top:8px}
+.thumbs a{flex:0 0 auto}
+.thumbs img{height:84px;width:auto;border-radius:8px;border:1px solid var(--line);background:#eee;display:block}
+.cap pre{white-space:pre-wrap;font:12.5px/1.4 system-ui,sans-serif;margin:6px 0 0;color:#3b3350}
+
+/* Modal escáner / overlay */
+.modal{position:fixed;inset:0;background:rgba(15,5,25,.92);z-index:60;display:flex;flex-direction:column;padding:calc(14px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));color:#fff}
+.modal h4{margin:4px 0 10px;font-size:16px}
+#reader{width:100%;max-width:520px;margin:0 auto;border-radius:12px;overflow:hidden;background:#000}
+#reader video{border-radius:12px}
+.modal .row{max-width:520px;margin:12px auto 0;width:100%}
+#readerFile{position:absolute;left:-9999px;top:0;width:300px;height:300px}
+.busy{position:fixed;inset:0;background:rgba(255,255,255,.75);backdrop-filter:blur(2px);z-index:70;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-weight:800;color:var(--tp)}
+.spin{width:42px;height:42px;border:4px solid var(--tp-l);border-top-color:var(--tp);border-radius:50%;animation:sp 0.8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#221a33;color:#fff;padding:12px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:80;max-width:92vw;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.foot{text-align:center;font-size:11.5px;color:var(--mute);margin-top:22px}
+.stick{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom));z-index:10}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <button class="back" id="btnBack" hidden aria-label="Regresar">‹</button>
+  <div class="brand">
+    <span id="logoSlot"></span>
+    <div class="tx"><b>Totalplay · D29</b><span id="viewTitle">Distrito 29 Huehuetoca · Evidencias</span></div>
+  </div>
+  <button class="cfg" id="btnCfg" aria-label="Ajustes">⚙️</button>
+</header>
+
+<main>
+  <!-- ================= INICIO ================= -->
+  <section class="view" id="v-home">
+    <div class="hero">
+      <span id="heroLogo"></span>
+      <p><b>Registro de evidencias en campo.</b><br>Elige el tipo de visita, captura la OS y las fotos; al final se genera el texto para WhatsApp.</p>
+    </div>
+    <div id="modeNote"></div>
+    <div class="sect">Tipo de captura</div>
+    <div class="grid" id="menuGrid"></div>
+    <div class="sect">Base de datos</div>
+    <div class="grid">
+      <button class="tile wide q" data-go="consulta"><span class="ic">🔎</span><span>Consultar OS / Cuenta<small>Ver todo lo capturado</small></span></button>
+      <button class="tile wide" data-go="carga"><span class="ic">📥</span><span>Cargar bitácora<small>Actualiza la base de OS con el Excel del día (coordinación)</small></span></button>
+    </div>
+    <div class="foot">Totalplay · Distrito 29 Huehuetoca · Coordinación PI</div>
+  </section>
+
+  <!-- ================= POST-VENTA ================= -->
+  <section class="view" id="v-postventa" hidden>
+    <div class="sect">Post-venta</div>
+    <div class="grid" id="pvGrid"></div>
+  </section>
+
+  <!-- ================= FORMULARIO ================= -->
+  <section class="view" id="v-form" hidden>
+    <div id="formBody"></div>
+  </section>
+
+  <!-- ================= RESULTADO ================= -->
+  <section class="view" id="v-done" hidden>
+    <div id="doneStatus"></div>
+    <div class="card">
+      <h3>💬 Texto para WhatsApp</h3>
+      <pre class="wa" id="waText"></pre>
+      <button class="btn wa block big" style="margin-top:12px" id="btnWA">Enviar por WhatsApp</button>
+      <div class="row">
+        <button class="btn sec" id="btnShare">📤 Compartir con fotos</button>
+        <button class="btn sec" id="btnCopy">📋 Copiar</button>
+      </div>
+    </div>
+    <button class="btn ghost block" id="btnNew">🏠 Nueva captura</button>
+  </section>
+
+  <!-- ================= CONSULTA ================= -->
+  <section class="view" id="v-consulta" hidden>
+    <div class="card">
+      <h3>🔎 Consultar capturas</h3>
+      <div class="seg" id="qSeg">
+        <button class="on" data-q="os">Por OS</button>
+        <button data-q="cuenta">Por Cuenta</button>
+      </div>
+      <label id="qLabel">Orden de servicio</label>
+      <div class="row" style="margin-top:0">
+        <input id="qIn" inputmode="numeric" placeholder="OS-12345678" autocomplete="off">
+        <button class="btn shrink" id="btnQ">Buscar</button>
+      </div>
+    </div>
+    <div id="qRes"></div>
+  </section>
+
+  <!-- ================= CARGA BITÁCORA ================= -->
+  <section class="view" id="v-carga" hidden>
+    <div class="card">
+      <h3>📥 Cargar bitácora</h3>
+      <p class="hint">Elige el Excel de la bitácora de OS (el mismo que usa el tablero Distrito Huehuetoca AJM). Se leen Cuenta, OS, Nombre Técnico, Tipo, Subtipo, Fecha Última Agenda, Cluster, Latitud y Longitud. La geocerca se asigna por cluster igual que en el tablero. Las OS nuevas se agregan, las existentes se actualizan y las anteriores se conservan.</p>
+      <label for="cfgAdmin">Clave de administrador</label>
+      <input id="cfgAdmin" type="password" autocomplete="off" placeholder="ADMIN_TOKEN del script">
+      <input type="file" id="inBit" accept=".xlsx,.xls,.xlsm,.csv" hidden>
+      <button class="btn block" style="margin-top:12px" id="btnBit">📄 Elegir archivo Excel</button>
+      <div id="bitRes"></div>
+    </div>
+  </section>
+
+  <!-- ================= AJUSTES ================= -->
+  <section class="view" id="v-ajustes" hidden>
+    <div class="card">
+      <h3>⚙️ Ajustes</h3>
+      <label>Tu nombre (aparece como “Capturó”)</label>
+      <input id="cfgNombre" placeholder="Nombre y apellido" autocomplete="name">
+      <label>WhatsApp destino (opcional, con lada país, ej. 5215512345678)</label>
+      <input id="cfgWa" inputmode="tel" placeholder="Vacío = elegir chat al enviar">
+      <label>URL del servicio (Apps Script /exec)</label>
+      <input id="cfgUrl" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off">
+      <label>Token (solo si se configuró en el script)</label>
+      <input id="cfgToken" autocomplete="off">
+      <div class="row">
+        <button class="btn" id="btnSaveCfg">Guardar</button>
+        <button class="btn sec" id="btnPing">Probar conexión</button>
+      </div>
+      <div id="cfgMsg"></div>
+    </div>
+  </section>
+</main>
+
+<!-- entradas ocultas -->
+<input type="file" id="inCam" accept="image/*" capture="environment" hidden>
+<input type="file" id="inGal" accept="image/*" hidden>
+<input type="file" id="inScan" accept="image/*" hidden>
+<div id="readerFile"></div>
+
+<div class="modal" id="scanModal" hidden>
+  <h4 id="scanTitle">Escanear</h4>
+  <div id="reader"></div>
+  <p style="text-align:center;font-size:13px;opacity:.8">Centra el código QR o de barras dentro del recuadro</p>
+  <div class="row"><button class="btn sec" id="btnScanClose">Cancelar</button></div>
+</div>
+<div class="busy" id="busy" hidden><div class="spin"></div><div id="busyTxt">Procesando…</div></div>
+<div id="toast" hidden></div>
+
+<script>
+/* ======================== CONFIGURACIÓN ======================== */
+const APP = {
+  API_URL: '',        // URL de la aplicación web de Apps Script (termina en /exec). Vacío = MODO DEMO
+  TOKEN: '',
+  LOGO_URL: '',       // ruta al logo oficial, p. ej. 'logo-totalplay.png' (en la misma carpeta)
+  COORD_DEC: 3,       // formato xx.xxx, -xx.xxx
+  DIST_ALERTA_M: 300, // alerta si la foto está más lejos que esto de la coordenada de la OS
+  HORAS_ALERTA: 12,   // alerta si la foto tiene más de estas horas
+  MAX_PX: 1600, JPG_Q: 0.72
+};
+
+/* ======================== FLUJOS ======================== */
+const SI_NO = ['Sí', 'No'];
+const FLUJOS = {
+  cancelacion: { titulo: 'CANCELACIÓN', icon: '⛔', sub: 'Cancelación de OS', fachada: 'req', equipos: null, fibra: null, campos: [
+    { id: 'motivo', label: 'Motivo de cancelación', tipo: 'select', req: true, op: ['Cliente ya no desea el servicio', 'Sin factibilidad / sin infraestructura', 'Domicilio incorrecto o no localizado', 'Cliente no se encuentra', 'Cliente ya cuenta con otro proveedor', 'OS duplicada', 'Otro'] },
+    { id: 'atiende', label: 'Nombre de quien atiende', tipo: 'text' },
+    { id: 'tel', label: 'Teléfono de contacto', tipo: 'tel' } ] },
+  reagenda: { titulo: 'REAGENDA', icon: '📅', sub: 'Nueva fecha de visita', fachada: 'req', equipos: null, fibra: null, campos: [
+    { id: 'motivo', label: 'Motivo de reagenda', tipo: 'select', req: true, op: ['Solicitud del cliente', 'Cliente no se encuentra', 'Falta de material', 'Condiciones climáticas', 'Acceso restringido', 'Otro'] },
+    { id: 'fecha', label: 'Nueva fecha', tipo: 'date', req: true },
+    { id: 'franja', label: 'Horario', tipo: 'select', req: true, op: ['Matutino 08:00–12:00', 'Mediodía 12:00–16:00', 'Vespertino 16:00–20:00'] },
+    { id: 'atiende', label: 'Nombre de quien autoriza', tipo: 'text' } ] },
+  retraso: { titulo: 'RETRASO DE VISITA', icon: '⏱️', sub: 'Aviso de llegada tarde', fachada: 'opt', equipos: null, fibra: null, campos: [
+    { id: 'motivo', label: 'Motivo del retraso', tipo: 'select', req: true, op: ['Tráfico', 'OS anterior se extendió', 'Falla vehicular', 'Traslado largo', 'Otro'] },
+    { id: 'llegada', label: 'Hora estimada de llegada', tipo: 'time', req: true },
+    { id: 'notificado', label: '¿Se notificó al cliente?', tipo: 'select', req: true, op: SI_NO } ] },
+  empresarial: { titulo: 'EMPRESARIAL', icon: '🏢', sub: 'Instalación / atención empresarial', fachada: 'req', equipos: 'req', fibra: 'req', campos: [
+    { id: 'razon', label: 'Razón social / negocio', tipo: 'text', req: true },
+    { id: 'contacto', label: 'Contacto en sitio', tipo: 'text' },
+    { id: 'potencia', label: 'Potencia óptica (dBm)', tipo: 'text', im: 'decimal' } ] },
+  instalacion: { titulo: 'INSTALACIÓN', icon: '🛠️', sub: 'Alta de servicio', fachada: 'req', equipos: 'req', fibra: 'req', campos: [
+    { id: 'potencia', label: 'Potencia óptica (dBm)', tipo: 'text', im: 'decimal' },
+    { id: 'paquete', label: 'Paquete', tipo: 'text' } ] },
+  soporte: { titulo: 'SOPORTE', icon: '🔧', sub: 'Falla / mantenimiento', fachada: 'req', equipos: 'opt', fibra: 'opt', campos: [
+    { id: 'falla', label: 'Falla reportada', tipo: 'select', req: true, op: ['Sin servicio', 'Intermitencia', 'Lentitud', 'Sin TV', 'Sin telefonía', 'Daño en fibra / acometida', 'Cambio de equipo', 'Otro'] },
+    { id: 'solucion', label: 'Solución aplicada', tipo: 'textarea', req: true },
+    { id: 'potencia', label: 'Potencia óptica (dBm)', tipo: 'text', im: 'decimal' } ] },
+  // ---- Post-venta ----
+  addon: { pv: true, titulo: 'POST-VENTA · ADDON', icon: '➕', sub: 'Addon', fachada: 'req', equipos: 'req', fibra: null, campos: [
+    { id: 'addon', label: 'Addon instalado', tipo: 'text', req: true } ] },
+  extender: { pv: true, titulo: 'POST-VENTA · EXTENDER', icon: '📶', sub: 'Extender', fachada: 'req', equipos: 'req', fibra: null, campos: [
+    { id: 'cantidad', label: 'Cantidad de extenders', tipo: 'number', req: true, im: 'numeric' },
+    { id: 'ubic', label: 'Ubicación en el domicilio', tipo: 'text' } ] },
+  cambioDom: { pv: true, titulo: 'POST-VENTA · CAMBIO DE DOMICILIO', icon: '🏠', sub: 'Cambio de domicilio', fachada: 'req', equipos: 'req', fibra: 'req', campos: [
+    { id: 'domAnt', label: 'Domicilio anterior', tipo: 'text' },
+    { id: 'domNuevo', label: 'Domicilio nuevo', tipo: 'text', req: true },
+    { id: 'potencia', label: 'Potencia óptica (dBm)', tipo: 'text', im: 'decimal' } ] },
+  recoleccion: { pv: true, titulo: 'POST-VENTA · RECOLECCIÓN', icon: '📦', sub: 'Recolección', fachada: 'req', equipos: 'req', equiposLabel: 'Equipos recolectados', fibra: null, campos: [
+    { id: 'estado', label: 'Estado de los equipos', tipo: 'select', req: true, op: ['Completo', 'Incompleto', 'Dañado'] },
+    { id: 'entrega', label: 'Nombre de quien entrega', tipo: 'text' } ] }
+};
+const MENU = ['cancelacion', 'reagenda', 'retraso', 'empresarial', 'instalacion', 'soporte'];
+const PV = ['addon', 'extender', 'cambioDom', 'recoleccion'];
+
+/* ======================== UTILIDADES ======================== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const LSget = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+const LSset = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const pad = n => String(n).padStart(2, '0');
+const fmtF = d => `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const fmtC = (a, b) => `${a.toFixed(APP.COORD_DEC)}, ${b.toFixed(APP.COORD_DEC)}`;
+const okNum = v => typeof v === 'number' && isFinite(v);
+function distM(a, b, c, d) { const R = 6371000, r = x => x * Math.PI / 180; const dl = r(c - a), dg = r(d - b); const h = Math.sin(dl / 2) ** 2 + Math.cos(r(a)) * Math.cos(r(c)) * Math.sin(dg / 2) ** 2; return Math.round(2 * R * Math.asin(Math.sqrt(h))); }
+function toast(t, ms = 3200) { const e = $('#toast'); e.textContent = t; e.hidden = false; clearTimeout(e._t); e._t = setTimeout(() => e.hidden = true, ms); }
+function busy(t) { $('#busyTxt').textContent = t || 'Procesando…'; $('#busy').hidden = !t; }
+function genFolio() { const d = new Date(); return `D29-${String(d.getFullYear()).slice(2)}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`; }
+function driveId(u) { const m = /\/d\/([\w-]{20,})/.exec(u || '') || /[?&]id=([\w-]{20,})/.exec(u || ''); return m ? m[1] : ''; }
+async function copiar(t) {
+  try { await navigator.clipboard.writeText(t); return true; } catch (e) {
+    const ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+    let ok = false; try { ok = document.execCommand('copy'); } catch (x) {} ta.remove(); return ok;
+  }
+}
+
+/* ======================== AJUSTES ======================== */
+let cfg = (() => { const s = LSget('d29_cfg') || {}; return { apiUrl: s.apiUrl || APP.API_URL, token: s.token || APP.TOKEN, nombre: s.nombre || '', waNum: s.waNum || '', admin: s.admin || '' }; })();
+function demo() { return !cfg.apiUrl; }
+
+/* ======================== API ======================== */
+async function api(action, params = {}, body = null) {
+  if (demo()) return demoApi(action, params, body);
+  const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), body ? 120000 : 30000);
+  try {
+    let r;
+    if (body) r = await fetch(cfg.apiUrl, { method: 'POST', body: JSON.stringify({ action, token: cfg.token, ...body }), signal: ctl.signal });
+    else r = await fetch(cfg.apiUrl + (cfg.apiUrl.includes('?') ? '&' : '?') + new URLSearchParams({ action, token: cfg.token || '', ...params }), { signal: ctl.signal });
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error || 'Error del servidor');
+    return j;
+  } catch (e) {
+    if (e.name === 'AbortError') throw new Error('Tiempo de espera agotado. Revisa tu señal.');
+    if (e instanceof TypeError) throw new Error('Sin conexión con el servicio. Revisa la URL en Ajustes o tu señal.');
+    throw e;
+  } finally { clearTimeout(to); }
+}
+/* Datos de ejemplo para probar sin backend */
+const DEMO_BASE = [
+  { os: 'OS-12345678', cuenta: '0101234567', tecnico: 'Técnico Demo Uno', tipo: 'INSTALACION', subtipo: 'FTTH RESIDENCIAL', fechaAsignacion: '24/10/2026 08:15', geocerca: 'HUEHUETOCA CENTRO', cluster: 'HTC-03', lat: 19.8336, lng: -99.2035 },
+  { os: 'OS-87654321', cuenta: '0101234567', tecnico: 'Técnico Demo Dos', tipo: 'SOPORTE', subtipo: 'SIN SERVICIO', fechaAsignacion: '20/10/2026 10:40', geocerca: 'HUEHUETOCA CENTRO', cluster: 'HTC-03', lat: 19.8336, lng: -99.2035 }
+].map(b => ({ ...b, coords: fmtC(b.lat, b.lng) }));
+async function demoApi(action, p, body) {
+  await new Promise(r => setTimeout(r, 400));
+  const caps = LSget('d29_demo') || [];
+  const BASE = [...(LSget('d29_demo_base') || []), ...DEMO_BASE];
+  const dg = v => String(v || '').replace(/\D/g, '');
+  const idn = v => String(v || '').replace(/\s/g, '').replace(/^0+/, '');
+  if (action === 'ping') return { ok: true, app: 'MODO DEMO' };
+  if (action === 'buscarOS') return { ok: true, base: BASE.find(b => dg(b.os) === dg(p.os)) || null, capturas: caps.filter(c => dg(c.os) === dg(p.os)).reverse() };
+  if (action === 'buscarCuenta') return { ok: true, ordenes: BASE.filter(b => idn(b.cuenta) === idn(p.cuenta)), capturas: caps.filter(c => idn(c.cuenta) === idn(p.cuenta)).reverse() };
+  if (action === 'cargarBase') {
+    const prev = LSget('d29_demo_base') || [], m = {};
+    prev.forEach(b => m[dg(b.os)] = b);
+    body.rows.forEach(r => { const lat = parseFloat(r.lat), lng = parseFloat(r.lon), ok = isFinite(lat) && isFinite(lng);
+      m[dg(r.os)] = { os: 'OS-' + dg(r.os), cuenta: String(r.cuenta), tecnico: r.tecnico, tipo: r.tipo, subtipo: r.subtipo, fechaAsignacion: r.fecha, geocerca: r.geocerca, cluster: r.cluster, lat: ok ? lat : null, lng: ok ? lng : null, coords: ok ? fmtC(lat, lng) : '' }; });
+    const all = Object.values(m); LSset('d29_demo_base', all.slice(-3000));
+    return { ok: true, nuevos: all.length - prev.length, actualizados: body.rows.length - (all.length - prev.length), omitidos: 0, total: all.length };
+  }
+  if (action === 'guardar') {
+    const d = body.data, texto = d.texto + '\n*📁 Evidencias:* (modo demo, sin guardar fotos)';
+    caps.push({ folio: d.folio, registro: fmtF(new Date()), flujo: d.flujoTitulo, os: d.os, cuenta: d.cuenta, tecnico: (d.base || {}).tecnico || '', tipo: (d.base || {}).tipo || '',
+      fachadaFecha: d.fachada ? d.fachada.fechaTxt : '', fachadaCoords: d.fachada ? d.fachada.coords : '', series: d.series.join('\n'), fibraTipo: d.fibra ? d.fibra.tipoTxt : '',
+      fibraMetros: d.fibra ? d.fibra.metros : '', fibraQR: d.fibra ? d.fibra.qr : '', campos: d.campos.map(c => c.label + ': ' + c.valor).join('\n'), comentarios: d.comentarios, alertas: d.alertas.join('\n'), capturista: d.capturista, texto });
+    LSset('d29_demo', caps.slice(-40));
+    return { ok: true, folio: d.folio, carpeta: '', texto };
+  }
+  throw new Error('Acción no válida');
+}
+
+/* ======================== NAVEGACIÓN ======================== */
+let cur = 'home';
+const TITULOS = { carga: 'Cargar bitácora', home: 'Distrito 29 Huehuetoca · Evidencias', postventa: 'Post-venta', consulta: 'Consulta de base', ajustes: 'Ajustes', done: 'Captura lista' };
+function go(v, push = true) {
+  document.querySelectorAll('.view').forEach(e => e.hidden = e.id !== 'v-' + v);
+  cur = v;
+  $('#btnBack').hidden = v === 'home';
+  $('#viewTitle').textContent = v === 'form' && S ? FLUJOS[S.flujo].titulo : (TITULOS[v] || '');
+  if (v === 'ajustes') fillCfg();
+  if (v === 'carga') $('#cfgAdmin').value = cfg.admin || '';
+  if (v === 'home') renderModeNote();
+  window.scrollTo(0, 0);
+  if (push) history.pushState({ v }, '', '#' + v);
+}
+window.addEventListener('popstate', e => {
+  const v = (e.state && e.state.v) || 'home';
+  if (cur === 'form' && v !== 'form' && dirty() && !confirm('¿Salir de la captura? Se perderán los datos.')) { history.pushState({ v: 'form' }, '', '#form'); return; }
+  if (v === 'form' && !S) return go('home', false);
+  go(v, false);
+});
+$('#btnBack').onclick = () => history.back();
+$('#btnCfg').onclick = () => go('ajustes');
+document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) { e.preventDefault(); go(g.dataset.go); } });
+
+/* ======================== MENÚ ======================== */
+function tile(k) { const f = FLUJOS[k]; return `<button class="tile" data-flujo="${k}"><span class="ic">${f.icon}</span><span>${esc(f.titulo.replace('POST-VENTA · ', ''))}<small>${esc(f.sub)}</small></span></button>`; }
+$('#menuGrid').innerHTML = MENU.map(tile).join('') + `<button class="tile wide pv" data-go="postventa"><span class="ic">🧩</span><span>POST-VENTA<small>Addon · Extender · Cambio de domicilio · Recolección</small></span></button>`;
+$('#pvGrid').innerHTML = PV.map(tile).join('');
+document.addEventListener('click', e => { const t = e.target.closest('[data-flujo]'); if (t) iniciar(t.dataset.flujo); });
+function renderModeNote() {
+  $('#modeNote').innerHTML = demo() ? `<div class="note warn" style="margin-bottom:6px">Modo demo: no hay servicio configurado. Prueba con la OS 12345678 o la cuenta 0101234567. <a href="#" data-go="ajustes">Configurar</a></div>`
+    : (!cfg.nombre ? `<div class="note info">Agrega tu nombre en <a href="#" data-go="ajustes">Ajustes</a> para que aparezca en los reportes.</div>` : '');
+}
+function logoHTML(h) { return APP.LOGO_URL ? `<img src="${esc(APP.LOGO_URL)}" alt="Totalplay" style="height:${h}px">` : EMBLEM(h); }
+function EMBLEM(h) {
+  return `<svg width="${h}" height="${h}" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="g${h}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3d1660"/><stop offset=".6" stop-color="#5b2a86"/><stop offset="1" stop-color="#e6007e"/></linearGradient></defs>
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#g${h})" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+  <path d="M12 46c8-4 14-12 20-26M20 50c8-5 16-14 22-30" stroke="#fff" stroke-opacity=".35" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <text x="32" y="40" text-anchor="middle" font-family="system-ui,Arial" font-size="24" font-weight="900" fill="#fff">29</text>
+  <text x="32" y="54" text-anchor="middle" font-family="system-ui,Arial" font-size="7.5" font-weight="800" fill="#fff" letter-spacing="1">HUEHUETOCA</text></svg>`;
+}
+$('#logoSlot').innerHTML = logoHTML(36);
+$('#heroLogo').innerHTML = EMBLEM(52);
+
+/* ======================== GEOLOCALIZACIÓN ======================== */
+let lastPos = null;
+function getPos(maxAge = 30000) {
+  return new Promise(res => {
+    if (!navigator.geolocation) return res(null);
+    if (lastPos && Date.now() - lastPos.t < maxAge) return res(lastPos);
+    navigator.geolocation.getCurrentPosition(
+      p => { lastPos = { lat: p.coords.latitude, lng: p.coords.longitude, acc: Math.round(p.coords.accuracy), t: Date.now() }; res(lastPos); },
+      () => res(null), { enableHighAccuracy: true, timeout: 12000, maximumAge: 20000 });
+  });
+}
+
+/* ======================== CAPTURA ======================== */
+let S = null;
+function iniciar(k) {
+  S = { flujo: k, folio: genFolio(), osDig: '', base: null, osEstado: '', cuentaManual: '', campos: {}, fachada: null, equipos: [], series: [], fibra: { tipo: '', metros: '', qr: '', qrImg: '' }, comentarios: '' };
+  renderForm();
+  go('form');
+  getPos(0); // pide permiso de ubicación desde el inicio
+}
+function dirty() { return S && (S.osDig || S.fachada || S.equipos.length || S.series.length || Object.values(S.campos).some(Boolean)); }
+
+function tagFor(r) { return r === 'req' ? '<em class="tag">Obligatorio</em>' : '<em class="tag opt">Opcional</em>'; }
+function campoHTML(c) {
+  const v = esc(S.campos[c.id] || ''), lab = `<label for="c_${c.id}">${esc(c.label)}${c.req ? ' <span class="rq">*</span>' : ''}</label>`;
+  if (c.tipo === 'select') return lab + `<select id="c_${c.id}" data-campo="${c.id}"><option value="">Selecciona…</option>${c.op.map(o => `<option${S.campos[c.id] === o ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
+  if (c.tipo === 'textarea') return lab + `<textarea id="c_${c.id}" data-campo="${c.id}">${v}</textarea>`;
+  return lab + `<input id="c_${c.id}" data-campo="${c.id}" type="${c.tipo}" value="${v}"${c.im ? ` inputmode="${c.im}"` : ''}>`;
+}
+function renderForm() {
+  const f = FLUJOS[S.flujo];
+  let h = `<div class="card" id="secOS"><h3>🧾 Orden de servicio ${tagFor('req')}</h3>
+    <div class="osbox" id="osBox"><span>OS-</span><input id="osIn" inputmode="numeric" maxlength="12" placeholder="12345678" autocomplete="off" value="${S.osDig}"></div>
+    <div class="errmsg" id="osErr"></div>
+    <div id="osData">${renderBase()}</div></div>`;
+  if (f.campos.length) h += `<div class="card" id="secCampos"><h3>${f.icon} Datos de ${esc(f.sub.toLowerCase())}</h3>${f.campos.map(campoHTML).join('')}</div>`;
+  if (f.fachada) h += `<div class="card" id="secFachada"><h3>🏠 Foto panorámica de fachada ${tagFor(f.fachada)}</h3>
+    <p class="hint">Toma la foto en horizontal, con la fachada completa y el número exterior visibles. Fecha, hora y ubicación se leen de la foto y quedan bloqueadas.</p>
+    <div id="fachadaBox"></div>
+    <div class="row"><button class="btn" data-act="cam" data-kind="fachada">📷 Tomar foto</button><button class="btn sec" data-act="gal" data-kind="fachada">🖼️ Galería</button></div></div>`;
+  if (f.equipos) h += `<div class="card" id="secEquipos"><h3>📡 ${esc(f.equiposLabel || 'Equipo(s) instalado(s)')} ${tagFor(f.equipos)}</h3>
+    <p class="hint">Foto panorámica del equipo o equipos y la serie de cada uno.</p>
+    <div id="equiposBox"></div>
+    <div class="row"><button class="btn" data-act="cam" data-kind="equipo">📷 Foto de equipo</button><button class="btn sec" data-act="gal" data-kind="equipo">🖼️ Galería</button></div>
+    <label for="serieIn">Series de equipos${f.equipos === 'req' ? ' <span class="rq">*</span>' : ''}</label>
+    <div class="row" style="margin-top:0"><input id="serieIn" placeholder="Escribe o escanea la serie" autocapitalize="characters" autocomplete="off"><button class="btn shrink" data-act="addSerie">＋</button></div>
+    <div class="row"><button class="btn sec sm" data-act="scan" data-for="serie">▦ Escanear QR / barras</button><button class="btn sec sm" data-act="scanFile" data-for="serie">🖼️ Leer de una foto</button></div>
+    <div class="chips" id="seriesBox"></div></div>`;
+  if (f.fibra) h += `<div class="card" id="secFibra"><h3>🧵 Fibra utilizada ${tagFor(f.fibra)}</h3>
+    <div class="seg" id="fibraSeg"><button data-act="fibra" data-v="unifibra">Unifibra</button><button data-act="fibra" data-v="precon">Preconectorizada</button>${f.fibra === 'opt' ? '<button data-act="fibra" data-v="">Ninguna</button>' : ''}</div>
+    <div id="fibraBox"></div></div>`;
+  h += `<div class="card"><h3>📝 Comentarios ${tagFor('opt')}</h3><textarea id="coment" placeholder="Observaciones adicionales">${esc(S.comentarios)}</textarea></div>
+    <div class="stick"><button class="btn block big" data-act="guardar">💾 Guardar y generar texto</button></div>`;
+  $('#formBody').innerHTML = h;
+  renderFotos('fachada'); renderFotos('equipo'); renderSeries(); renderFibra();
+}
+
+/* ---- OS ---- */
+function renderBase() {
+  if (S.osEstado === 'buscando') return `<div class="note info">Buscando OS-${esc(S.osDig)} en la base…</div>`;
+  if (S.osEstado === 'error') return `<div class="note err">${esc(S.osError)}</div><button class="btn sec block" style="margin-top:8px" data-act="buscarOS">Reintentar</button>`;
+  if (S.base) {
+    const b = S.base;
+    const fila = (k, v) => v ? `<dt>${k}</dt><dd>${v}</dd>` : '';
+    return `<div class="basecard"><div class="h"><span>DATOS DE LA BASE</span><em class="tag lock">🔒 Solo lectura</em></div><dl class="kv">
+      ${fila('Cuenta', esc(b.cuenta))}${fila('OS', esc(b.os))}${fila('Técnico', esc(b.tecnico))}${fila('Tipo', esc(b.tipo))}${fila('Subtipo', esc(b.subtipo))}
+      ${fila('Asignación', esc(b.fechaAsignacion))}${fila('Geocerca', esc(b.geocerca))}${fila('Cluster', esc(b.cluster))}
+      ${fila('Lat, Long', b.coords ? `<a href="https://maps.google.com/?q=${b.lat},${b.lng}" target="_blank" rel="noopener">${esc(b.coords)}</a>` : '')}</dl></div>`;
+  }
+  if (S.osEstado === 'noexiste') return `<div class="note warn">La OS-${esc(S.osDig)} no aparece en la base. Puedes continuar capturando la cuenta manualmente.</div>
+    <label for="ctaIn">Cuenta <span class="rq">*</span></label><input id="ctaIn" inputmode="numeric" value="${esc(S.cuentaManual)}" autocomplete="off">`;
+  return '';
+}
+let osReq = 0, osTimer = null;
+async function buscarOS() {
+  if (S.osDig.length !== 8) return;
+  const id = ++osReq;
+  S.osEstado = 'buscando'; S.base = null; $('#osData').innerHTML = renderBase();
+  try {
+    const r = await api('buscarOS', { os: 'OS-' + S.osDig });
+    if (id !== osReq || !S) return;
+    S.base = r.base; S.osEstado = r.base ? 'ok' : 'noexiste';
+    if (r.capturas && r.capturas.length) toast(`Esta OS ya tiene ${r.capturas.length} captura(s) registrada(s).`);
+  } catch (e) { if (id !== osReq) return; S.osEstado = 'error'; S.osError = e.message; }
+  $('#osData').innerHTML = renderBase();
+  renderFotos('fachada'); renderFotos('equipo'); // recalcula distancias
+}
+
+/* ---- Fotos con metadatos ---- */
+let fotoKind = 'fachada';
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b || !S) return;
+  const a = b.dataset.act;
+  if (a === 'cam' || a === 'gal') {
+    fotoKind = b.dataset.kind;
+    const inp = a === 'cam' ? $('#inCam') : $('#inGal');
+    inp.multiple = a === 'gal' && fotoKind === 'equipo';
+    inp.value = ''; inp.click();
+  }
+  else if (a === 'delFoto') {
+    if (!confirm('¿Quitar esta foto?')) return;
+    if (b.dataset.kind === 'fachada') S.fachada = null; else S.equipos.splice(+b.dataset.i, 1);
+    renderFotos(b.dataset.kind);
+  }
+  else if (a === 'addSerie') addSerie($('#serieIn').value);
+  else if (a === 'delSerie') { S.series.splice(+b.dataset.i, 1); renderSeries(); }
+  else if (a === 'scan') abrirEscaner(b.dataset.for);
+  else if (a === 'scanFile') { scanFor = b.dataset.for; $('#inScan').value = ''; $('#inScan').click(); }
+  else if (a === 'fibra') { S.fibra.tipo = b.dataset.v; renderFibra(); }
+  else if (a === 'qrManual') { const t = prompt('Escribe el código de la fibra:'); if (t && t.trim()) { S.fibra.qr = t.trim(); S.fibra.qrFuente = 'Manual'; renderFibra(); } }
+  else if (a === 'buscarOS') buscarOS();
+  else if (a === 'guardar') guardar();
+});
+document.addEventListener('input', e => {
+  if (!S) return;
+  const t = e.target;
+  if (t.id === 'osIn') {
+    let v = t.value.toUpperCase().replace(/^OS-?/, '').replace(/\D/g, '').slice(0, 8);
+    if (t.value !== v) t.value = v;
+    if (v !== S.osDig) { S.osDig = v; S.base = null; S.osEstado = ''; $('#osData').innerHTML = ''; }
+    $('#osBox').classList.remove('err'); $('#osErr').textContent = '';
+    clearTimeout(osTimer); if (v.length === 8) osTimer = setTimeout(buscarOS, 250);
+  }
+  else if (t.dataset.campo) { S.campos[t.dataset.campo] = t.value; t.classList.remove('err'); }
+  else if (t.id === 'ctaIn') { S.cuentaManual = t.value.trim(); t.classList.remove('err'); }
+  else if (t.id === 'coment') S.comentarios = t.value;
+  else if (t.id === 'fibraMetros') { S.fibra.metros = t.value; t.classList.remove('err'); }
+});
+document.addEventListener('change', e => { if (S && e.target.dataset.campo) S.campos[e.target.dataset.campo] = e.target.value; });
+document.addEventListener('keydown', e => { if (e.target.id === 'serieIn' && e.key === 'Enter') { e.preventDefault(); addSerie(e.target.value); } });
+
+$('#inCam').onchange = e => { const f = Array.from(e.target.files || []); e.target.value = ''; procesarArchivos(f, 'Cámara'); };
+$('#inGal').onchange = e => { const f = Array.from(e.target.files || []); e.target.value = ''; procesarArchivos(f, 'Galería'); };
+async function procesarArchivos(files, origen) {
+  if (!files || !files.length || !S) return;
+  const kind = fotoKind;
+  for (const file of Array.from(files)) {
+    busy('Leyendo metadatos de la foto…');
+    try {
+      const p = await procesarFoto(file, kind, origen);
+      if (kind === 'fachada') S.fachada = p; else S.equipos.push(p);
+    } catch (err) { toast('No se pudo procesar la foto: ' + err.message); }
+  }
+  busy(null); renderFotos(kind);
+}
+async function procesarFoto(file, kind, origen) {
+  let ex = {};
+  try { ex = (await exifr.parse(file, { tiff: true, exif: true, gps: true })) || {}; } catch (e) {}
+  if (!okNum(ex.latitude)) { try { const g = await exifr.gps(file); if (g) { ex.latitude = g.latitude; ex.longitude = g.longitude; } } catch (e) {} }
+  let lat = null, lng = null, fuenteUb, acc = null;
+  if (okNum(ex.latitude) && okNum(ex.longitude) && !(ex.latitude === 0 && ex.longitude === 0)) { lat = ex.latitude; lng = ex.longitude; fuenteUb = 'GPS de la foto (EXIF)'; }
+  else {
+    busy('Obteniendo ubicación del teléfono…');
+    const p = await getPos(30000);
+    if (p) { lat = p.lat; lng = p.lng; acc = p.acc; fuenteUb = `GPS del teléfono al ${origen === 'Cámara' ? 'capturar' : 'subir'} (±${p.acc} m)`; }
+    else fuenteUb = 'Sin ubicación (GPS desactivado o sin permiso)';
+  }
+  let fecha, fuenteFecha;
+  const d = ex.DateTimeOriginal || ex.CreateDate || ex.ModifyDate;
+  if (d instanceof Date && !isNaN(d)) { fecha = d; fuenteFecha = 'EXIF'; }
+  else if (origen === 'Galería' && file.lastModified) { fecha = new Date(file.lastModified); fuenteFecha = 'Archivo'; }
+  else { fecha = new Date(); fuenteFecha = 'Reloj del teléfono'; }
+
+  const alertas = [];
+  if (lat == null) alertas.push('Foto sin geolocalización');
+  if (origen === 'Galería' && !/EXIF/.test(fuenteUb) && lat != null) alertas.push('Foto de galería sin GPS: se usó la ubicación actual del teléfono');
+  const horas = (Date.now() - fecha.getTime()) / 36e5;
+  if (horas > APP.HORAS_ALERTA) alertas.push(`Foto tomada hace ${horas >= 48 ? Math.round(horas / 24) + ' días' : Math.round(horas) + ' h'}`);
+  if (horas < -0.5) alertas.push('Fecha de la foto posterior a la hora actual');
+
+  const coords = lat != null ? fmtC(lat, lng) : '';
+  busy('Sellando foto…');
+  const etiqueta = kind === 'fachada' ? 'FACHADA' : 'EQUIPO';
+  const img = await sellar(file, [
+    `OS-${S.osDig || '________'} · ${etiqueta} · Totalplay D29 Huehuetoca`,
+    `${fmtF(fecha)} (${fuenteFecha}) · ${coords || 'sin ubicación'}`
+  ]);
+  return Object.freeze({ kind, img, fecha: fecha.toISOString(), fechaTxt: fmtF(fecha), fuenteFecha, lat, lng, acc, coords, fuenteUb, origen,
+    camara: [ex.Make, ex.Model].filter(Boolean).join(' '), alertasFijas: Object.freeze(alertas) });
+}
+async function cargarImagen(file) {
+  if (window.createImageBitmap) { try { return await createImageBitmap(file, { imageOrientation: 'from-image' }); } catch (e) {} }
+  return new Promise((res, rej) => { const u = URL.createObjectURL(file), im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('formato de imagen no soportado')); im.src = u; });
+}
+async function sellar(file, lineas) {
+  const im = await cargarImagen(file);
+  let w = im.naturalWidth || im.width, h = im.naturalHeight || im.height;
+  const sc = Math.min(1, APP.MAX_PX / Math.max(w, h)); w = Math.round(w * sc); h = Math.round(h * sc);
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const x = c.getContext('2d'); x.drawImage(im, 0, 0, w, h);
+  const fs = Math.max(13, Math.round(Math.min(w, h * 1.4) / 40)), p = Math.round(fs * .6), lh = Math.round(fs * 1.35), bh = p * 2 + lh * lineas.length;
+  x.fillStyle = 'rgba(20,6,34,.68)'; x.fillRect(0, h - bh, w, bh);
+  x.fillStyle = '#e6007e'; x.fillRect(0, h - bh, Math.max(4, fs / 3), bh);
+  x.fillStyle = '#fff'; x.textBaseline = 'top';
+  lineas.forEach((t, i) => { x.font = `${i ? 500 : 800} ${fs}px system-ui, Arial, sans-serif`; x.fillText(t, p * 1.6, h - bh + p + i * lh, w - p * 3); });
+  return c.toDataURL('image/jpeg', APP.JPG_Q);
+}
+function distOS(p) { const b = S && S.base; return (b && okNum(b.lat) && okNum(b.lng) && p.lat != null) ? distM(b.lat, b.lng, p.lat, p.lng) : null; }
+function alertasDe(p) { const a = [...p.alertasFijas], d = distOS(p); if (d != null && d > APP.DIST_ALERTA_M) a.push(`Foto a ${d} m de la ubicación de la OS`); return a; }
+function fotoHTML(p, i) {
+  const d = distOS(p);
+  return `<div class="photo"><img src="${p.img}" alt="Foto ${p.kind}"><div class="body">
+    <div class="lockbar">🔒 Metadatos bloqueados</div>
+    <dl class="kv"><dt>Fecha/hora</dt><dd>${esc(p.fechaTxt)} <small>(${esc(p.fuenteFecha)})</small></dd>
+    <dt>Lat, Long</dt><dd>${p.coords ? `<a href="https://maps.google.com/?q=${p.lat},${p.lng}" target="_blank" rel="noopener">${esc(p.coords)}</a>` : '—'}</dd>
+    <dt>Fuente</dt><dd>${esc(p.fuenteUb)}</dd>${d != null ? `<dt>Distancia OS</dt><dd>${d} m</dd>` : ''}
+    <dt>Origen</dt><dd>${esc(p.origen)}${p.camara ? ' · ' + esc(p.camara) : ''}</dd></dl>
+    ${alertasDe(p).map(a => `<div class="alert">⚠️ ${esc(a)}</div>`).join('')}
+    <div class="row"><button class="btn ghost sm" data-act="delFoto" data-kind="${p.kind}" data-i="${i}">🗑️ Quitar foto</button></div></div></div>`;
+}
+function renderFotos(kind) {
+  if (!S) return;
+  if (kind === 'fachada') { const el = $('#fachadaBox'); if (el) el.innerHTML = S.fachada ? fotoHTML(S.fachada, 0) : ''; }
+  else { const el = $('#equiposBox'); if (el) el.innerHTML = S.equipos.map(fotoHTML).join(''); }
+}
+
+/* ---- Series ---- */
+function addSerie(v) {
+  v = String(v || '').trim().toUpperCase(); if (!v) return;
+  if (S.series.includes(v)) { toast('Esa serie ya está capturada'); return; }
+  S.series.push(v); const i = $('#serieIn'); if (i) { i.value = ''; i.classList.remove('err'); }
+  renderSeries();
+}
+function renderSeries() { const el = $('#seriesBox'); if (el) el.innerHTML = S.series.map((s, i) => `<span class="chip"><i>${i + 1}</i>${esc(s)}<button data-act="delSerie" data-i="${i}" aria-label="Quitar">✕</button></span>`).join(''); }
+
+/* ---- Fibra ---- */
+function renderFibra() {
+  const el = $('#fibraBox'); if (!el) return;
+  document.querySelectorAll('#fibraSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === S.fibra.tipo && (b.dataset.v !== '' || S.fibra.tipoElegido)));
+  if (S.fibra.tipo === 'unifibra') el.innerHTML = `<label for="fibraMetros">Metros de unifibra <span class="rq">*</span></label><input id="fibraMetros" type="number" inputmode="decimal" min="1" step="1" value="${esc(S.fibra.metros)}" placeholder="Ej. 45">`;
+  else if (S.fibra.tipo === 'precon') el.innerHTML = `<p class="hint" style="margin-top:12px">Escanea o sube la foto del QR de la fibra preconectorizada.</p>
+    <div class="row"><button class="btn sm" data-act="scan" data-for="fibra">▦ Escanear QR</button><button class="btn sec sm" data-act="scanFile" data-for="fibra">🖼️ Subir QR</button></div>
+    ${S.fibra.qr ? `<div class="qrval"><b>Dato leído${S.fibra.qrFuente ? ' (' + esc(S.fibra.qrFuente) + ')' : ''}:</b><br>${esc(S.fibra.qr)}</div>` : `<div id="fibraErr"></div><button class="btn ghost sm" style="margin-top:8px" data-act="qrManual">No se puede leer, capturar a mano</button>`}`;
+  else el.innerHTML = '';
+}
+document.addEventListener('click', e => { const b = e.target.closest('[data-act="fibra"]'); if (b && S) { S.fibra.tipoElegido = true; renderFibra(); } });
+
+/* ---- Escáner QR / código de barras ---- */
+let qr = null, scanFor = 'serie', scanHecho = false;
+function formatos() {
+  if (!window.Html5QrcodeSupportedFormats) return undefined;
+  const F = Html5QrcodeSupportedFormats;
+  return [F.QR_CODE, F.CODE_128, F.CODE_39, F.CODE_93, F.EAN_13, F.EAN_8, F.UPC_A, F.UPC_E, F.ITF, F.DATA_MATRIX, F.CODABAR, F.PDF_417].filter(v => v !== undefined);
+}
+async function abrirEscaner(para) {
+  if (!window.Html5Qrcode) return toast('No cargó el lector de códigos. Revisa tu conexión.');
+  scanFor = para; scanHecho = false;
+  $('#scanTitle').textContent = para === 'fibra' ? 'Escanear QR de la fibra' : 'Escanear serie del equipo';
+  $('#scanModal').hidden = false;
+  qr = new Html5Qrcode('reader', { formatsToSupport: formatos(), verbose: false, experimentalFeatures: { useBarCodeDetectorIfSupported: true } });
+  try {
+    await qr.start({ facingMode: 'environment' },
+      { fps: 12, qrbox: (vw, vh) => { const m = Math.min(vw, vh); return { width: Math.round(m * .9), height: Math.round(m * .6) }; } },
+      txt => { if (scanHecho) return; scanHecho = true; if (navigator.vibrate) navigator.vibrate(80); cerrarEscaner(); recibirCodigo(txt, 'Cámara'); }, () => {});
+  } catch (e) { cerrarEscaner(); toast('No se pudo abrir la cámara. Da permiso de cámara o usa “Leer de una foto”.'); }
+}
+async function cerrarEscaner() {
+  $('#scanModal').hidden = true;
+  const q = qr; qr = null;
+  if (q) { try { if (q.isScanning) await q.stop(); q.clear(); } catch (e) {} }
+}
+$('#btnScanClose').onclick = cerrarEscaner;
+$('#inScan').onchange = async e => {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  if (!window.Html5Qrcode) return toast('No cargó el lector de códigos.');
+  busy('Leyendo código…');
+  const h = new Html5Qrcode('readerFile', { formatsToSupport: formatos(), verbose: false });
+  try {
+    const txt = await h.scanFile(f, false);
+    if (scanFor === 'fibra') { try { S.fibra.qrImg = await sellar(f, [`OS-${S.osDig} · QR FIBRA · Totalplay D29`, fmtF(new Date())]); } catch (x) {} }
+    recibirCodigo(txt, 'Foto');
+  } catch (err) { toast('No se encontró un código legible en la foto. Intenta con más luz y enfoque.'); }
+  finally { try { h.clear(); } catch (x) {} busy(null); }
+};
+function recibirCodigo(txt, fuente) {
+  txt = String(txt || '').trim(); if (!txt || !S) return;
+  if (scanFor === 'fibra') { S.fibra.qr = txt; S.fibra.qrFuente = fuente; renderFibra(); toast('QR de fibra leído'); }
+  else { addSerie(txt); toast('Serie agregada: ' + txt); }
+}
+
+/* ======================== VALIDACIÓN Y GUARDADO ======================== */
+function validar() {
+  const f = FLUJOS[S.flujo], errs = [];
+  const marca = (el, msg) => { if (el) el.classList.add('err'); errs.push({ el, msg }); };
+  if (S.osDig.length !== 8) { $('#osErr').textContent = 'Captura la OS con 8 dígitos (OS-XXXXXXXX).'; marca($('#osBox'), 'OS'); }
+  else if (S.osEstado === 'buscando') marca($('#osBox'), 'Espera a que termine la búsqueda de la OS');
+  else if (!S.base && S.osEstado !== 'noexiste') marca($('#osBox'), 'No se pudo consultar la OS. Toca “Reintentar”.');
+  else if (!S.base && !S.cuentaManual) marca($('#ctaIn'), 'Captura la cuenta');
+  f.campos.forEach(c => { if (c.req && !String(S.campos[c.id] || '').trim()) marca($('#c_' + c.id), c.label); });
+  if (f.fachada === 'req' && !S.fachada) marca($('#secFachada'), 'Falta la foto de fachada');
+  if (f.equipos === 'req' && !S.equipos.length) marca($('#secEquipos'), 'Falta la foto del equipo');
+  if (f.equipos === 'req' && !S.series.length) marca($('#serieIn'), 'Captura al menos una serie');
+  if (f.fibra === 'req' && !S.fibra.tipo) marca($('#secFibra'), 'Indica el tipo de fibra');
+  if (S.fibra.tipo === 'unifibra' && !(parseFloat(S.fibra.metros) > 0)) marca($('#fibraMetros'), 'Metros de unifibra');
+  if (S.fibra.tipo === 'precon' && !S.fibra.qr) marca($('#secFibra'), 'Escanea el QR de la fibra');
+  setTimeout(() => document.querySelectorAll('.card.err').forEach(c => c.classList.remove('err')), 2500);
+  return errs;
+}
+function datosBase() { return S.base || { os: 'OS-' + S.osDig, cuenta: S.cuentaManual }; }
+function construirTexto() {
+  const f = FLUJOS[S.flujo], b = datosBase(), L = [];
+  const add = (k, v) => { if (v !== undefined && v !== null && String(v).trim() !== '') L.push(`*${k}:* ${v}`); };
+  L.push('*TOTALPLAY · DISTRITO 29 HUEHUETOCA*');
+  L.push(`${f.icon} *${f.titulo}*`);
+  L.push('━━━━━━━━━━━━━━');
+  add('OS', 'OS-' + S.osDig); add('Cuenta', b.cuenta); add('Técnico', b.tecnico);
+  add('Tipo', [b.tipo, b.subtipo].filter(Boolean).join(' / '));
+  add('Asignación', b.fechaAsignacion); add('Geocerca', b.geocerca); add('Cluster', b.cluster); add('Coordenadas OS', b.coords);
+  if (!S.base) L.push('⚠️ _OS no encontrada en la base_');
+  const campos = f.campos.filter(c => S.campos[c.id]);
+  if (campos.length) { L.push(''); campos.forEach(c => add(c.label, c.tipo === 'date' ? S.campos[c.id].split('-').reverse().join('/') : S.campos[c.id])); }
+  const fotoLin = p => `${p.fechaTxt} · ${p.coords || 'sin ubicación'}`;
+  if (S.fachada) { L.push(''); L.push(`📷 *Fachada:* ${fotoLin(S.fachada)}`); const d = distOS(S.fachada); if (d != null) L.push(`   _a ${d} m de la OS_`); }
+  if (S.equipos.length) { if (!S.fachada) L.push(''); L.push(`📡 *Fotos de equipo (${S.equipos.length}):*`); S.equipos.forEach((p, i) => L.push(`   ${i + 1}. ${fotoLin(p)}`)); }
+  if (S.series.length) { L.push(`🔢 *${S.flujo === 'recoleccion' ? 'Series recolectadas' : 'Series'} (${S.series.length}):*`); S.series.forEach((s, i) => L.push(`   ${i + 1}. ${s}`)); }
+  if (S.fibra.tipo === 'unifibra') L.push(`🧵 *Fibra:* Unifibra · ${S.fibra.metros} m`);
+  if (S.fibra.tipo === 'precon') L.push(`🧵 *Fibra:* Preconectorizada · QR: ${S.fibra.qr}`);
+  if (S.comentarios.trim()) { L.push(''); add('📝 Comentarios', S.comentarios.trim()); }
+  const al = todasAlertas(); if (al.length) { L.push(''); L.push('⚠️ *Alertas:*'); al.forEach(a => L.push('   • ' + a)); }
+  L.push('');
+  add('Folio', S.folio);
+  if (cfg.nombre) add('Capturó', cfg.nombre);
+  add('Registro', fmtF(new Date()));
+  return L.join('\n');
+}
+function todasAlertas() { const a = []; if (S.fachada) alertasDe(S.fachada).forEach(x => a.push('Fachada: ' + x)); S.equipos.forEach((p, i) => alertasDe(p).forEach(x => a.push(`Equipo ${i + 1}: ` + x))); return a; }
+function metaFoto(p) { return { img: p.img, fecha: p.fecha, fechaTxt: p.fechaTxt, fuenteFecha: p.fuenteFecha, lat: p.lat, lng: p.lng, acc: p.acc, coords: p.coords, fuenteUb: p.fuenteUb, origen: p.origen, dist: distOS(p) }; }
+
+let ultimo = null;
+async function guardar() {
+  const errs = validar();
+  if (errs.length) {
+    const first = errs[0].el; if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    toast('Falta: ' + errs.map(e => e.msg).slice(0, 3).join(' · '), 4500); return;
+  }
+  const f = FLUJOS[S.flujo], texto = construirTexto();
+  const data = {
+    folio: S.folio, flujo: S.flujo, flujoTitulo: f.titulo, os: 'OS-' + S.osDig, cuenta: datosBase().cuenta, base: S.base,
+    campos: f.campos.filter(c => S.campos[c.id]).map(c => ({ id: c.id, label: c.label, valor: S.campos[c.id] })),
+    fachada: S.fachada ? metaFoto(S.fachada) : null, equipos: S.equipos.map(metaFoto), series: S.series,
+    fibra: S.fibra.tipo ? { tipo: S.fibra.tipo, tipoTxt: S.fibra.tipo === 'unifibra' ? 'Unifibra' : 'Preconectorizada', metros: S.fibra.tipo === 'unifibra' ? S.fibra.metros : '', qr: S.fibra.tipo === 'precon' ? S.fibra.qr : '', qrImg: S.fibra.tipo === 'precon' ? S.fibra.qrImg : '' } : null,
+    comentarios: S.comentarios.trim(), alertas: todasAlertas(), capturista: cfg.nombre, dispositivo: navigator.userAgent.slice(0, 180), texto
+  };
+  ultimo = { texto, fotos: [S.fachada, ...S.equipos].filter(Boolean), os: 'OS-' + S.osDig, guardado: false };
+  busy(demo() ? 'Guardando (demo)…' : 'Subiendo fotos y guardando…');
+  try {
+    const r = await api('guardar', {}, { data });
+    ultimo.texto = r.texto || texto; ultimo.guardado = true;
+    $('#doneStatus').innerHTML = `<div class="note ok" style="margin:0 0 12px">✅ Guardado en la base · Folio ${esc(r.folio)}${r.carpeta ? ` · <a href="${esc(r.carpeta)}" target="_blank" rel="noopener">ver fotos</a>` : ''}</div>`;
+  } catch (e) {
+    $('#doneStatus').innerHTML = `<div class="note err" style="margin:0 0 12px">❌ No se guardó: ${esc(e.message)}<br><button class="btn sm" style="margin-top:8px" id="btnRetry">Reintentar guardado</button></div>`;
+    setTimeout(() => { const b = $('#btnRetry'); if (b) b.onclick = () => { go('form'); guardar(); }; });
+  }
+  busy(null);
+  $('#waText').textContent = ultimo.texto;
+  go('done');
+}
+function enviarWA(t) { const n = (cfg.waNum || '').replace(/\D/g, ''); window.open(`https://wa.me/${n}?text=${encodeURIComponent(t)}`, '_blank'); }
+$('#btnWA').onclick = () => ultimo && enviarWA(ultimo.texto);
+$('#btnCopy').onclick = async () => { if (ultimo) toast(await copiar(ultimo.texto) ? 'Texto copiado' : 'No se pudo copiar'); };
+$('#btnShare').onclick = async () => {
+  if (!ultimo) return;
+  const files = await Promise.all(ultimo.fotos.map(async (p, i) => { const bl = await (await fetch(p.img)).blob(); return new File([bl], `${ultimo.os}_${p.kind}_${i + 1}.jpg`, { type: 'image/jpeg' }); }));
+  await copiar(ultimo.texto);
+  if (navigator.canShare && files.length && navigator.canShare({ files })) {
+    try { await navigator.share({ files, text: ultimo.texto }); toast('Si WhatsApp no pegó el texto, mantén presionado y pega: ya está copiado.', 5000); } catch (e) {}
+  } else toast('Este teléfono no permite compartir fotos desde el navegador. Usa “Enviar por WhatsApp”.', 4500);
+};
+$('#btnNew').onclick = () => { S = null; ultimo = null; history.replaceState({ v: 'home' }, '', '#home'); go('home', false); };
+
+/* ======================== CONSULTA ======================== */
+let qModo = 'os';
+$('#qSeg').onclick = e => { const b = e.target.closest('button'); if (!b) return; setQModo(b.dataset.q); };
+function setQModo(m) { qModo = m; document.querySelectorAll('#qSeg button').forEach(x => x.classList.toggle('on', x.dataset.q === m)); $('#qLabel').textContent = m === 'os' ? 'Orden de servicio' : 'Número de cuenta'; $('#qIn').placeholder = m === 'os' ? 'OS-12345678' : '0101234567'; }
+$('#qIn').addEventListener('input', e => { if (/^os/i.test(e.target.value) && qModo !== 'os') setQModo('os'); });
+$('#qIn').addEventListener('keydown', e => { if (e.key === 'Enter') consultar(); });
+$('#btnQ').onclick = consultar;
+async function consultar() {
+  const raw = $('#qIn').value.trim(); if (!raw) return;
+  const out = $('#qRes');
+  let params;
+  if (qModo === 'os') { const d = raw.replace(/\D/g, ''); if (d.length !== 8) return toast('La OS debe tener 8 dígitos'); params = { os: 'OS-' + d }; }
+  else params = { cuenta: raw };
+  out.innerHTML = `<div class="note info">Buscando…</div>`;
+  try {
+    const r = await api(qModo === 'os' ? 'buscarOS' : 'buscarCuenta', params);
+    const grupos = {};
+    const ordenes = qModo === 'os' ? (r.base ? [r.base] : []) : (r.ordenes || []);
+    ordenes.forEach(b => grupos[b.os] = { base: b, caps: [] });
+    (r.capturas || []).forEach(c => { const k = c.os; (grupos[k] = grupos[k] || { base: null, caps: [] }).caps.push(c); });
+    const keys = Object.keys(grupos);
+    if (!keys.length) { out.innerHTML = `<div class="note warn">Sin resultados para ${esc(raw)}.</div>`; return; }
+    const total = keys.reduce((n, k) => n + grupos[k].caps.length, 0);
+    out.innerHTML = `<div class="sect">${keys.length} OS · ${total} captura(s)</div>` + keys.map((k, i) => resHTML(k, grupos[k], keys.length === 1 || i === 0)).join('');
+  } catch (e) { out.innerHTML = `<div class="note err">${esc(e.message)}</div>`; }
+}
+function resHTML(os, g, abierto) {
+  const b = g.base || (g.caps[0] || {}), n = g.caps.length;
+  const fila = (k, v) => v ? `<dt>${k}</dt><dd>${v}</dd>` : '';
+  const lat = g.base && g.base.lat, lng = g.base && g.base.lng;
+  return `<details class="res"${abierto ? ' open' : ''}><summary><div><b>${esc(os)}</b><small>${esc([b.tipo, b.subtipo].filter(Boolean).join(' / ') || 'Sin datos en base')}</small></div><span class="cnt${n ? '' : ' zero'}">${n} captura${n === 1 ? '' : 's'}</span></summary><div class="in">
+    <dl class="kv">${fila('Cuenta', esc(b.cuenta))}${fila('Técnico', esc(b.tecnico))}${fila('Asignación', esc(b.fechaAsignacion))}${fila('Geocerca', esc(b.geocerca))}${fila('Cluster', esc(b.cluster))}
+    ${fila('Lat, Long', g.base && g.base.coords ? `<a href="https://maps.google.com/?q=${lat},${lng}" target="_blank" rel="noopener">${esc(g.base.coords)}</a>` : esc(b.coordsOS))}</dl>
+    ${g.caps.map(capHTML).join('') || '<div class="note info">Aún no hay capturas para esta OS.</div>'}</div></details>`;
+}
+let capTextos = [];
+function capHTML(c) {
+  const i = capTextos.push(c.texto || '') - 1;
+  const urls = [c.fachadaUrl, ...String(c.equiposUrls || '').split('\n')].filter(Boolean);
+  const thumbs = urls.map(u => { const id = driveId(u); return id ? `<a href="${esc(u)}" target="_blank" rel="noopener"><img loading="lazy" src="https://drive.google.com/thumbnail?id=${id}&sz=w320" alt="foto"></a>` : ''; }).join('');
+  const det = [
+    c.fachadaFecha && `Fachada: ${c.fachadaFecha} · ${c.fachadaCoords}${c.fachadaDistancia !== '' && c.fachadaDistancia != null ? ` · ${c.fachadaDistancia} m de la OS` : ''}`,
+    c.equiposMeta && `Equipos:\n${c.equiposMeta}`,
+    c.series && `Series:\n${c.series}`,
+    c.fibraTipo && `Fibra: ${c.fibraTipo}${c.fibraMetros ? ' · ' + c.fibraMetros + ' m' : ''}${c.fibraQR ? ' · QR: ' + String(c.fibraQR).split('\n')[0] : ''}`,
+    c.campos, c.comentarios && `Comentarios: ${c.comentarios}`
+  ].filter(Boolean).join('\n');
+  return `<div class="cap"><div class="hd"><b>${esc(c.flujo)}</b><span>${esc(c.registro)}</span></div>
+    <div style="font-size:12px;color:var(--mute)">Folio ${esc(c.folio)}${c.capturista ? ' · ' + esc(c.capturista) : ''}</div>
+    ${thumbs ? `<div class="thumbs">${thumbs}</div>` : ''}
+    <pre>${esc(det)}</pre>
+    ${c.alertas ? String(c.alertas).split('\n').map(a => `<div class="alert">⚠️ ${esc(a)}</div>`).join('') : ''}
+    <div class="row">${c.texto ? `<button class="btn wa sm" data-wa="${i}">Reenviar WhatsApp</button><button class="btn sec sm" data-cp="${i}">Copiar texto</button>` : ''}${c.carpeta ? `<a class="btn ghost sm" href="${esc(c.carpeta)}" target="_blank" rel="noopener">📁 Fotos</a>` : ''}</div></div>`;
+}
+document.addEventListener('click', async e => {
+  const w = e.target.closest('[data-wa]'); if (w) return enviarWA(capTextos[+w.dataset.wa]);
+  const c = e.target.closest('[data-cp]'); if (c) toast(await copiar(capTextos[+c.dataset.cp]) ? 'Texto copiado' : 'No se pudo copiar');
+});
+
+/* ======================== CARGA DE BITÁCORA ======================== */
+/* Mismas reglas que el tablero Distrito Huehuetoca AJM */
+const CLUSTER_TO_GEOCERCA = {
+  "HUEHUETOCA":"HUEHUETOCA G","HUEHUETOCA_A":"HUEHUETOCA G","PASEOS DE LA PRADERA":"HUEHUETOCA G",
+  "JALTENCO":"JALTENCO G","JALTENCO_A":"JALTENCO G",
+  "AMPLIACION LOS REYES ACOZAC":"LOS REYES ACOZAC G","AMPLIACION LOS REYES ACOZAC 2":"LOS REYES ACOZAC G",
+  "LOS REYES ACOZAC":"LOS REYES ACOZAC G","LOS REYES ACOZAC_A":"LOS REYES ACOZAC G",
+  "AMPLIACION TEPEJI 1":"TEPEJI G","AMPLIACION TEPEJI 2":"TEPEJI G","AMPLIACION TEPEJI 3":"TEPEJI G","AMPLIACION TEPEJI 4":"TEPEJI G",
+  "TEPEJI":"TEPEJI G","TEPEJI_2_A":"TEPEJI G","TEPEJI_A":"TEPEJI G",
+  "TIZAYUCA_5_A":"TEQUIXQUIAC","ZUMPANGO_5_A":"TEQUIXQUIAC","ZUMPANGO_6_A":"TEQUIXQUIAC",
+  "AMPLIACION TIZAYUCA":"TIZAYUCA G","AMPLIACION TIZAYUCA 2":"TIZAYUCA G","AMPLIACION TIZAYUCA 3":"TIZAYUCA G",
+  "AMPLIACION TIZAYUCA 4":"TIZAYUCA G","AMPLIACION TIZAYUCA 5":"TIZAYUCA G",
+  "TIZAYUCA":"TIZAYUCA G","TIZAYUCA_2_A":"TIZAYUCA G","TIZAYUCA_3_A":"TIZAYUCA G","TIZAYUCA_4_A":"TIZAYUCA G",
+  "TIZAYUCA_6_A":"TIZAYUCA G","TIZAYUCA_7_A":"TIZAYUCA G","TIZAYUCA_8_A":"TIZAYUCA G","TIZAYUCA_A":"TIZAYUCA G",
+  "AMPLIACION HUEHUETOCA":"ZUMPANGO G","AMPLIACION HUEHUETOCA_A":"ZUMPANGO G",
+  "AMPLIACION ZUMPANGO":"ZUMPANGO G","AMPLIACION ZUMPANGO 2":"ZUMPANGO G","AMPLIACION ZUMPANGO_2_A":"ZUMPANGO G",
+  "AMPLIACION ZUMPANGO_3_A":"ZUMPANGO G","AMPLIACION ZUMPANGO_A":"ZUMPANGO G",
+  "ZUMPANGO":"ZUMPANGO G","ZUMPANGO_2_A":"ZUMPANGO G","ZUMPANGO_3_A":"ZUMPANGO G","ZUMPANGO_A":"ZUMPANGO G"
+};
+const BIT_MAP = { 'cuenta': 'cuenta', 'os': 'os', 'nombre tecnico': 'tecnico', 'tipo': 'tipo', 'subtipo': 'subtipo', 'cluster': 'cluster',
+  'latitud': 'lat', 'longitud': 'lon', 'fecha ultima agenda': 'fecha', 'estatus': 'estatus' };
+const normB = s => String(s == null ? '' : s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/\s+/g, ' ');
+function fechaBit(v) {
+  if (v === '' || v == null) return '';
+  if (typeof v === 'number') { // número de serie de Excel, redondeado al minuto
+    const d = new Date(Math.round((v - 25569) * 1440) * 60000);
+    return isNaN(d) ? '' : `${pad(d.getUTCDate())}/${pad(d.getUTCMonth() + 1)}/${d.getUTCFullYear()} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+  }
+  if (v instanceof Date) return fmtF(v);
+  return String(v).trim();
+}
+let bitRows = null;
+$('#btnBit').onclick = () => { if (!window.XLSX) return toast('No cargó el lector de Excel. Revisa tu conexión.'); $('#inBit').value = ''; $('#inBit').click(); };
+$('#inBit').onchange = async e => {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  busy('Leyendo bitácora…');
+  try {
+    const wb = XLSX.read(await f.arrayBuffer(), { type: 'array', cellDates: false });
+    const grid = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true, defval: '' });
+    let hi = -1, cm = {};
+    for (let i = 0; i < Math.min(8, grid.length); i++) {
+      const n = grid[i].map(normB);
+      if (n.includes('cuenta') && n.includes('os')) { hi = i; n.forEach((h, j) => { if (BIT_MAP[h]) cm[j] = BIT_MAP[h]; }); break; }
+    }
+    if (hi < 0) throw new Error('No se encontró el encabezado con las columnas "Cuenta" y "OS".');
+    const rows = [];
+    for (let i = hi + 1; i < grid.length; i++) {
+      const raw = grid[i]; if (!raw || !raw.length) continue;
+      const r = {}; Object.entries(cm).forEach(([j, k]) => r[k] = raw[j]);
+      if (!String(r.os || '').replace(/\D/g, '')) continue;
+      r.cuenta = String(r.cuenta == null ? '' : r.cuenta).trim();
+      ['tecnico', 'tipo', 'subtipo', 'cluster', 'estatus'].forEach(k => r[k] = String(r[k] == null ? '' : r[k]).trim());
+      r.fecha = fechaBit(r.fecha);
+      r.geocerca = CLUSTER_TO_GEOCERCA[r.cluster.toUpperCase()] || (r.cluster ? 'TULA' : 'Sin cluster');
+      r.lat = r.lat === '' ? '' : String(r.lat); r.lon = r.lon === '' ? '' : String(r.lon);
+      rows.push(r);
+    }
+    if (!rows.length) throw new Error('El archivo no tiene OS.');
+    bitRows = rows;
+    const falt = ['tecnico', 'fecha', 'lat', 'lon', 'cluster'].filter(k => !Object.values(cm).includes(k));
+    const ej = rows[0];
+    $('#bitRes').innerHTML = `<div class="note ok">${rows.length} OS leídas de “${esc(f.name)}”.</div>
+      ${falt.length ? `<div class="note warn">No se encontraron las columnas: ${falt.join(', ')}</div>` : ''}
+      <dl class="kv"><dt>Ejemplo</dt><dd>OS-${esc(String(ej.os).replace(/\D/g, ''))} · ${esc(ej.cuenta)}</dd><dt>Técnico</dt><dd>${esc(ej.tecnico)}</dd>
+      <dt>Asignación</dt><dd>${esc(ej.fecha)}</dd><dt>Geocerca</dt><dd>${esc(ej.geocerca)} · ${esc(ej.cluster)}</dd></dl>
+      <button class="btn block big" style="margin-top:12px" id="btnBitUp">⬆️ Subir ${rows.length} OS a la base</button>`;
+    $('#btnBitUp').onclick = subirBitacora;
+  } catch (err) { $('#bitRes').innerHTML = `<div class="note err">${esc(err.message)}</div>`; }
+  busy(null);
+};
+async function subirBitacora() {
+  cfg.admin = $('#cfgAdmin').value.trim(); LSset('d29_cfg', cfg);
+  if (!demo() && !cfg.admin) { toast('Escribe la clave de administrador'); $('#cfgAdmin').focus(); return; }
+  const T = 800; let nuevos = 0, act = 0, total = 0;
+  try {
+    for (let i = 0; i < bitRows.length; i += T) {
+      busy(`Subiendo ${Math.min(i + T, bitRows.length)} de ${bitRows.length}…`);
+      const r = await api('cargarBase', {}, { admin: cfg.admin, rows: bitRows.slice(i, i + T) });
+      nuevos += r.nuevos; act += r.actualizados; total = r.total;
+    }
+    $('#bitRes').innerHTML = `<div class="note ok">✅ Base actualizada: ${nuevos} OS nuevas, ${act} actualizadas. Total en base: ${total}.</div>`;
+    bitRows = null;
+  } catch (e) { $('#bitRes').insertAdjacentHTML('beforeend', `<div class="note err">${esc(e.message)}</div>`); }
+  busy(null);
+}
+
+/* ======================== AJUSTES ======================== */
+function fillCfg() { $('#cfgNombre').value = cfg.nombre; $('#cfgWa').value = cfg.waNum; $('#cfgUrl').value = cfg.apiUrl; $('#cfgToken').value = cfg.token; $('#cfgMsg').innerHTML = ''; }
+function leerCfg() { cfg = { admin: cfg.admin, nombre: $('#cfgNombre').value.trim(), waNum: $('#cfgWa').value.trim(), apiUrl: $('#cfgUrl').value.trim(), token: $('#cfgToken').value.trim() }; LSset('d29_cfg', cfg); }
+$('#btnSaveCfg').onclick = () => { leerCfg(); $('#cfgMsg').innerHTML = `<div class="note ok">Ajustes guardados en este teléfono${demo() ? ' (sin URL: modo demo)' : ''}.</div>`; };
+$('#btnPing').onclick = async () => {
+  leerCfg(); $('#cfgMsg').innerHTML = `<div class="note info">Probando…</div>`;
+  try { const r = await api('ping'); $('#cfgMsg').innerHTML = `<div class="note ok">Conectado: ${esc(r.app)}${r.hora ? ' · ' + esc(r.hora) : ''}</div>`; }
+  catch (e) { $('#cfgMsg').innerHTML = `<div class="note err">${esc(e.message)}</div>`; }
+};
+
+/* ======================== INICIO ======================== */
+history.replaceState({ v: 'home' }, '', '#home');
+go('home', false);
+window.addEventListener('beforeunload', e => { if (cur === 'form' && dirty()) { e.preventDefault(); e.returnValue = ''; } });
+</script>
+</body>
+</html>
