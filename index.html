@@ -240,7 +240,7 @@ pre.wa{white-space:pre-wrap;word-break:break-word;background:#e8f8ee;border:1px 
   <section class="view" id="v-carga" hidden>
     <div class="card">
       <h3>📥 Cargar bitácora</h3>
-      <p class="hint">Elige el Excel de la bitácora de OS (el mismo que usa el tablero Distrito Huehuetoca AJM). Se leen Cuenta, OS, Nombre Técnico, Tipo, Subtipo, Fecha Última Agenda, Cluster, Latitud y Longitud. La geocerca se asigna por cluster igual que en el tablero. Las OS nuevas se agregan, las existentes se actualizan y las anteriores se conservan.</p>
+      <p class="hint">Elige el Excel de la bitácora de OS (el mismo que usa el tablero Distrito Huehuetoca AJM). Se leen Cuenta, OS, Nombre Técnico, Tipo, Subtipo, Fecha Última Agenda, Cluster, Latitud y Longitud. La geocerca se asigna por cluster igual que en el tablero. Solo se agregan las OS que aún no existen; lo que ya está en la base nunca se borra ni se modifica.</p>
       <label for="cfgAdmin">Clave de administrador</label>
       <input id="cfgAdmin" type="password" autocomplete="off" placeholder="ADMIN_TOKEN del script">
       <input type="file" id="inBit" accept=".xlsx,.xls,.xlsm,.csv" hidden>
@@ -289,7 +289,7 @@ pre.wa{white-space:pre-wrap;word-break:break-word;background:#e8f8ee;border:1px 
 <script>
 /* ======================== CONFIGURACIÓN ======================== */
 const APP = {
-  API_URL: '',        // URL de la aplicación web de Apps Script (termina en /exec). Vacío = MODO DEMO
+  API_URL: 'https://script.google.com/macros/s/AKfycby8v4u0IIKmrK5PwHbVBt_q3pCYMSi0BbjuTdzXvM47JemU1JEzaTV1SIGY1Qx9BX0b/exec', // servicio Apps Script
   TOKEN: '',
   LOGO_URL: '',       // ruta al logo oficial, p. ej. 'logo-totalplay.png' (en la misma carpeta)
   COORD_DEC: 3,       // formato xx.xxx, -xx.xxx
@@ -402,10 +402,10 @@ async function demoApi(action, p, body) {
   if (action === 'cargarBase') {
     const prev = LSget('d29_demo_base') || [], m = {};
     prev.forEach(b => m[dg(b.os)] = b);
-    body.rows.forEach(r => { const lat = parseFloat(r.lat), lng = parseFloat(r.lon), ok = isFinite(lat) && isFinite(lng);
+    body.rows.forEach(r => { if (m[dg(r.os)]) return; const lat = parseFloat(r.lat), lng = parseFloat(r.lon), ok = isFinite(lat) && isFinite(lng);
       m[dg(r.os)] = { os: 'OS-' + dg(r.os), cuenta: String(r.cuenta), tecnico: r.tecnico, tipo: r.tipo, subtipo: r.subtipo, fechaAsignacion: r.fecha, geocerca: r.geocerca, cluster: r.cluster, lat: ok ? lat : null, lng: ok ? lng : null, coords: ok ? fmtC(lat, lng) : '' }; });
     const all = Object.values(m); LSset('d29_demo_base', all.slice(-3000));
-    return { ok: true, nuevos: all.length - prev.length, actualizados: body.rows.length - (all.length - prev.length), omitidos: 0, total: all.length };
+    return { ok: true, nuevos: all.length - prev.length, existentes: body.rows.length - (all.length - prev.length), omitidos: 0, total: all.length };
   }
   if (action === 'guardar') {
     const d = body.data, texto = d.texto + '\n*📁 Evidencias:* (modo demo)', b = d.base || {};
@@ -457,8 +457,9 @@ $('#menuGrid').innerHTML = MENU.map(tile).join('') + `<button class="tile wide p
 $('#pvGrid').innerHTML = PV.map(tile).join('');
 document.addEventListener('click', e => { const t = e.target.closest('[data-flujo]'); if (t) iniciar(t.dataset.flujo); });
 function renderModeNote() {
-  $('#modeNote').innerHTML = demo() ? `<div class="note warn" style="margin-bottom:6px">Modo demo: no hay servicio configurado. Prueba con la OS 12345678 o la cuenta 0101234567. <a href="#" data-go="ajustes">Configurar</a></div>`
-    : (!cfg.nombre ? `<div class="note info">Agrega tu nombre en <a href="#" data-go="ajustes">Ajustes</a> para que aparezca en los reportes.</div>` : '');
+  $('#modeNote').innerHTML = (demo() ? `<div class="note err" style="margin-bottom:6px">⚠️ Este teléfono NO está conectado al servicio: las capturas no llegan a la base. <a href="#" data-go="ajustes">Configurar la URL</a></div>`
+    : (!cfg.nombre ? `<div class="note info">Agrega tu nombre en <a href="#" data-go="ajustes">Ajustes</a> para que aparezca en los reportes.</div>` : '')) + '<div id="pendNote"></div>';
+  pintarPendientes();
 }
 function logoHTML(h) { return APP.LOGO_URL ? `<img src="${esc(APP.LOGO_URL)}" alt="Totalplay" style="height:${h}px">` : EMBLEM(h); }
 function EMBLEM(h) {
@@ -815,13 +816,18 @@ async function guardar() {
     comentarios: S.comentarios.trim(), alertas: todasAlertas(), capturista: cfg.nombre, dispositivo: navigator.userAgent.slice(0, 180), texto
   };
   ultimo = { texto, fotos: [S.fachada, ...S.equipos].filter(Boolean), os: 'OS-' + S.osDig, guardado: false };
-  busy(demo() ? 'Guardando (demo)…' : 'Subiendo fotos y guardando…');
+  busy('Subiendo fotos y guardando…');
   try {
+    if (demo()) throw new Error('Este teléfono no tiene configurada la URL del servicio.');
     const r = await api('guardar', {}, { data });
     ultimo.texto = r.texto || texto; ultimo.guardado = true;
     $('#doneStatus').innerHTML = `<div class="note ok" style="margin:0 0 12px">✅ Guardado en la base · Folio ${esc(r.folio)}${r.carpeta ? ` · <a href="${esc(r.carpeta)}" target="_blank" rel="noopener">ver fotos</a>` : ''}</div>`;
   } catch (e) {
-    $('#doneStatus').innerHTML = `<div class="note err" style="margin:0 0 12px">❌ No se guardó: ${esc(e.message)}<br><button class="btn sm" style="margin-top:8px" id="btnRetry">Reintentar guardado</button></div>`;
+    let guardadaLocal = false;
+    try { await pendPut(data); guardadaLocal = true; } catch (x) {}
+    $('#doneStatus').innerHTML = guardadaLocal
+      ? `<div class="note warn" style="margin:0 0 12px">⏳ No se pudo subir todavía (${esc(e.message)})<br>La captura quedó guardada en este teléfono y se subirá sola en cuanto haya conexión con el servicio. No la borres ni desinstales el navegador.</div>`
+      : `<div class="note err" style="margin:0 0 12px">❌ No se guardó: ${esc(e.message)}<br><button class="btn sm" style="margin-top:8px" id="btnRetry">Reintentar guardado</button></div>`;
     setTimeout(() => { const b = $('#btnRetry'); if (b) b.onclick = () => { go('form'); guardar(); }; });
   }
   busy(null);
@@ -1033,9 +1039,9 @@ async function subirBitacora() {
     for (let i = 0; i < bitRows.length; i += T) {
       busy(`Subiendo ${Math.min(i + T, bitRows.length)} de ${bitRows.length}…`);
       const r = await api('cargarBase', {}, { admin: cfg.admin, rows: bitRows.slice(i, i + T) });
-      nuevos += r.nuevos; act += r.actualizados; total = r.total;
+      nuevos += r.nuevos; act += (r.existentes != null ? r.existentes : r.actualizados || 0); total = r.total;
     }
-    $('#bitRes').innerHTML = `<div class="note ok">✅ Base actualizada: ${nuevos} OS nuevas, ${act} actualizadas. Total en base: ${total}.</div>`;
+    $('#bitRes').innerHTML = `<div class="note ok">✅ Base actualizada: ${nuevos} OS nuevas agregadas, ${act} ya existían (sin cambios). Total en base: ${total}.</div>`;
     bitRows = null;
   } catch (e) { $('#bitRes').insertAdjacentHTML('beforeend', `<div class="note err">${esc(e.message)}</div>`); }
   busy(null);
@@ -1050,7 +1056,7 @@ const CHECK_URL = `<div class="note warn" style="text-align:left">Revisa en Apps
   2. Implementar > Gestionar implementaciones: tipo <b>Aplicación web</b>, Ejecutar como <b>Yo</b>, Acceso <b>Cualquier usuario</b>.<br>
   3. Si cambiaste el código, edita la implementación y elige <b>Nueva versión</b>.<br>
   4. Abre la URL en el navegador: debe mostrar <code>{"ok":true,...}</code>. Si pide iniciar sesión o permisos, falta el paso 1 o 2.</div>`;
-$('#btnSaveCfg').onclick = () => { if (!urlValida($('#cfgUrl').value.trim())) { $('#cfgMsg').innerHTML = `<div class="note err">La URL debe ser la de la aplicación web: https://script.google.com/macros/s/…/exec (no la del editor ni la de la hoja).</div>`; return; } leerCfg(); $('#cfgMsg').innerHTML = `<div class="note ok">Ajustes guardados en este teléfono${demo() ? ' (sin URL: modo demo)' : ''}.</div>`; };
+$('#btnSaveCfg').onclick = () => { if (!urlValida($('#cfgUrl').value.trim())) { $('#cfgMsg').innerHTML = `<div class="note err">La URL debe ser la de la aplicación web: https://script.google.com/macros/s/…/exec (no la del editor ni la de la hoja).</div>`; return; } leerCfg(); $('#cfgMsg').innerHTML = `<div class="note ok">Ajustes guardados en este teléfono${demo() ? ' (sin URL: NO conectado al servicio)' : ''}.</div>`; sincronizar(true); };
 $('#btnPing').onclick = async () => {
   leerCfg(); $('#cfgMsg').innerHTML = `<div class="note info">Probando…</div>`;
   try { const r = await api('ping'); $('#cfgMsg').innerHTML = `<div class="note ok">Conectado: ${esc(r.app)}${r.hora ? ' · ' + esc(r.hora) : ''}</div>`; }
@@ -1061,9 +1067,77 @@ $('#btnPing').onclick = async () => {
   }
 };
 
+/* ======================== PENDIENTES (sin conexión) ======================== */
+let _db = null;
+function pdb() {
+  return _db || (_db = new Promise((res, rej) => {
+    const r = indexedDB.open('d29_evidencias', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('pend', { keyPath: 'folio' });
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  }));
+}
+async function pendTx(mode, fn) {
+  const db = await pdb();
+  return new Promise((res, rej) => { const t = db.transaction('pend', mode), q = fn(t.objectStore('pend')); t.oncomplete = () => res(q && q.result); t.onerror = () => rej(t.error); });
+}
+const pendPut = d => pendTx('readwrite', s => s.put(d));
+const pendDel = k => pendTx('readwrite', s => s.delete(k));
+const pendAll = () => pendTx('readonly', s => s.getAll()).then(x => x || []).catch(() => []);
+async function pintarPendientes() {
+  const el = $('#pendNote'); if (!el) return;
+  const n = (await pendAll()).length;
+  el.innerHTML = n ? `<div class="note warn" style="margin-bottom:6px">⏳ ${n} captura(s) guardada(s) en este teléfono pendiente(s) de subir a la base.
+    ${demo() ? '' : '<br><button class="btn sm" style="margin-top:8px" id="btnSync">Subir ahora</button>'}</div>` : '';
+  const b = $('#btnSync'); if (b) b.onclick = () => sincronizar(true);
+}
+let sincronizando = false;
+async function sincronizar(manual) {
+  if (sincronizando || demo()) return;
+  const lista = await pendAll(); if (!lista.length) return;
+  sincronizando = true; let ok = 0, err = '';
+  if (manual) busy('Subiendo capturas pendientes…');
+  for (const d of lista) {
+    try { await api('guardar', {}, { data: d }); await pendDel(d.folio); ok++; }
+    catch (e) { err = e.message; if (/conexi|señal|respondió|Tiempo/i.test(err)) break; }
+  }
+  sincronizando = false; busy(null);
+  if (ok) toast(`✅ ${ok} captura(s) pendiente(s) subida(s) a la base`);
+  else if (manual && err) toast('No se pudo subir: ' + err, 5000);
+  if (cur === 'home') pintarPendientes();
+}
+/* Recupera capturas hechas antes en modo demo (sin URL) para subirlas a la base */
+async function recuperarDemo() {
+  const hechos = LSget('d29_migrados') || [];
+  const viejas = (LSget('d29_demo') || []).filter(c => c.folio && !hechos.includes(c.folio) && !/^OS-(12345678|87654321)$/.test(c.os));
+  for (const c of viejas) {
+    const fotos = c._fotos || [], tieneFach = !!c.fachadaUrl;
+    const em = lineas(c.equiposMeta);
+    const nEq = Math.max(lineas(c.equiposUrls).length, em.length);
+    const equipos = [];
+    for (let i = 0; i < nEq; i++) {
+      const p = (em[i] || '').replace(/^\d+\)\s*/, '').split('|').map(x => x.trim());
+      equipos.push({ img: fotos[i + (tieneFach ? 1 : 0)] || '', fechaTxt: p[0] || '', coords: p[1] || '', fuenteUb: p[2] || '' });
+    }
+    const data = {
+      folio: c.folio, flujoTitulo: c.flujo, os: c.os, cuenta: c.cuenta, base: { tecnico: c.tecnico, tipo: c.tipo, subtipo: c.subtipo || '' },
+      campos: lineas(c.campos).map(l => { const j = l.indexOf(':'); return { label: j > 0 ? l.slice(0, j) : 'Dato', valor: j > 0 ? l.slice(j + 1).trim() : l }; }),
+      fachada: tieneFach || c.fachadaFecha ? { img: fotos[0] || '', fechaTxt: c.fachadaFecha, fuenteFecha: '', coords: c.fachadaCoords, fuenteUb: c.fachadaFuente || '', origen: '', dist: c.fachadaDistancia === '' || c.fachadaDistancia == null ? null : c.fachadaDistancia } : null,
+      equipos, series: lineas(c.series),
+      fibra: c.fibraTipo ? { tipoTxt: c.fibraTipo, metros: c.fibraMetros, qr: c.fibraQR } : null,
+      comentarios: c.comentarios || '', alertas: [...lineas(c.alertas), 'Captura recuperada de modo sin conexión' + (fotos.length ? ' (fotos en resolución reducida)' : ' (sin fotos)')],
+      capturista: c.capturista || cfg.nombre, dispositivo: 'recuperada: ' + navigator.userAgent.slice(0, 150),
+      texto: String(c.texto || '').replace(/\n\*📁 Evidencias:\*.*$/, '')
+    };
+    try { await pendPut(data); hechos.push(c.folio); LSset('d29_migrados', hechos); } catch (e) { return; }
+  }
+}
+window.addEventListener('online', () => sincronizar());
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') sincronizar(); });
+
 /* ======================== INICIO ======================== */
 history.replaceState({ v: 'home' }, '', '#home');
 go('home', false);
+recuperarDemo().then(() => { pintarPendientes(); setTimeout(() => sincronizar(), 1200); });
 window.addEventListener('beforeunload', e => { if (cur === 'form' && dirty()) { e.preventDefault(); e.returnValue = ''; } });
 </script>
 </body>
