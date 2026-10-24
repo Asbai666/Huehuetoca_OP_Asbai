@@ -295,7 +295,11 @@ const APP = {
   COORD_DEC: 3,       // formato xx.xxx, -xx.xxx
   DIST_ALERTA_M: 300, // alerta si la foto está más lejos que esto de la coordenada de la OS
   HORAS_ALERTA: 12,   // alerta si la foto tiene más de estas horas
-  MAX_PX: 1600, JPG_Q: 0.72
+  MAX_PX: 1600, JPG_Q: 0.72,
+  /* Metadatos obligatorios (EXIF) */
+  EXIF_GALERIA_OBLIGATORIO: true,  // fotos subidas de galería: se rechazan si no traen fecha Y ubicación GPS en sus metadatos
+  EXIF_CAMARA_OBLIGATORIO: false,  // fotos tomadas en la app: true = también se rechazan sin GPS en metadatos (en Android suele venir sin GPS)
+  GALERIA_MAX_HORAS: 0             // 0 = sin límite; p. ej. 24 = rechaza fotos de galería con más de 24 h
 };
 
 /* ======================== FLUJOS ======================== */
@@ -510,11 +514,11 @@ function renderForm() {
   if (f.campos.length) h += `<div class="card" id="secCampos"><h3>${f.icon} Datos de ${esc(f.sub.toLowerCase())}</h3>${f.campos.map(campoHTML).join('')}</div>`;
   if (f.fachada) h += `<div class="card" id="secFachada"><h3>🏠 Foto panorámica de fachada ${tagFor(f.fachada)}</h3>
     <p class="hint">Toma la foto en horizontal, con la fachada completa y el número exterior visibles. Fecha, hora y ubicación se leen de la foto y quedan bloqueadas.</p>
-    <div id="fachadaBox"></div>
+    <div id="fachadaErr"></div><div id="fachadaBox"></div>
     <div class="row"><button class="btn" data-act="cam" data-kind="fachada">📷 Tomar foto</button><button class="btn sec" data-act="gal" data-kind="fachada">🖼️ Galería</button></div></div>`;
   if (f.equipos) h += `<div class="card" id="secEquipos"><h3>📡 ${esc(f.equiposLabel || 'Equipo(s) instalado(s)')} ${tagFor(f.equipos)}</h3>
     <p class="hint">Foto panorámica del equipo o equipos y la serie de cada uno.</p>
-    <div id="equiposBox"></div>
+    <div id="equipoErr"></div><div id="equiposBox"></div>
     <div class="row"><button class="btn" data-act="cam" data-kind="equipo">📷 Foto de equipo</button><button class="btn sec" data-act="gal" data-kind="equipo">🖼️ Galería</button></div>
     <label for="serieIn">Series de equipos${f.equipos === 'req' ? ' <span class="rq">*</span>' : ''}</label>
     <div class="row" style="margin-top:0"><input id="serieIn" placeholder="Escribe o escanea la serie" autocapitalize="characters" autocomplete="off"><button class="btn shrink" data-act="addSerie">＋</button></div>
@@ -607,42 +611,77 @@ $('#inCam').onchange = e => { const f = Array.from(e.target.files || []); e.targ
 $('#inGal').onchange = e => { const f = Array.from(e.target.files || []); e.target.value = ''; procesarArchivos(f, 'Galería'); };
 async function procesarArchivos(files, origen) {
   if (!files || !files.length || !S) return;
-  const kind = fotoKind;
+  const kind = fotoKind, errEl = $('#' + kind + 'Err'), rechazos = [];
+  if (errEl) errEl.innerHTML = '';
   for (const file of Array.from(files)) {
     busy('Leyendo metadatos de la foto…');
     try {
       const p = await procesarFoto(file, kind, origen);
       if (kind === 'fachada') S.fachada = p; else S.equipos.push(p);
-    } catch (err) { toast('No se pudo procesar la foto: ' + err.message); }
+    } catch (err) { rechazos.push(`<b>${esc(file.name || 'foto')}</b>: ${esc(err.message)}`); }
   }
   busy(null); renderFotos(kind);
+  if (rechazos.length && errEl) {
+    errEl.innerHTML = `<div class="note err">🚫 Foto rechazada<br>${rechazos.join('<br>')}<br><small style="font-weight:500">Cómo resolverlo: usa “📷 Tomar foto” desde la app, o sube la foto original tomada con la cámara del teléfono con la ubicación activada (no capturas de pantalla, ni fotos reenviadas por WhatsApp o editadas, porque pierden los metadatos).</small></div>`;
+    errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 }
-async function procesarFoto(file, kind, origen) {
+async function leerExif(file) {
+  if (!window.exifr) throw new Error('No cargó el lector de metadatos. Revisa tu conexión y recarga la página.');
   let ex = {};
-  try { ex = (await exifr.parse(file, { tiff: true, exif: true, gps: true })) || {}; } catch (e) {}
+  try { ex = (await exifr.parse(file, { tiff: true, ifd0: true, exif: true, gps: true, xmp: true, reviveValues: true })) || {}; } catch (e) { ex = {}; }
   if (!okNum(ex.latitude)) { try { const g = await exifr.gps(file); if (g) { ex.latitude = g.latitude; ex.longitude = g.longitude; } } catch (e) {} }
-  let lat = null, lng = null, fuenteUb, acc = null;
-  if (okNum(ex.latitude) && okNum(ex.longitude) && !(ex.latitude === 0 && ex.longitude === 0)) { lat = ex.latitude; lng = ex.longitude; fuenteUb = 'GPS de la foto (EXIF)'; }
+  const d = [ex.DateTimeOriginal, ex.CreateDate, ex.DateTimeDigitized, ex.ModifyDate].find(x => x instanceof Date && !isNaN(x));
+  const gpsOk = okNum(ex.latitude) && okNum(ex.longitude) && !(ex.latitude === 0 && ex.longitude === 0);
+  return {
+    fecha: d || null, lat: gpsOk ? ex.latitude : null, lng: gpsOk ? ex.longitude : null,
+    alt: okNum(ex.GPSAltitude) ? Math.round(ex.GPSAltitude) : null,
+    marca: String(ex.Make || '').trim(), modelo: String(ex.Model || '').trim(), software: String(ex.Software || ex.CreatorTool || '').trim(),
+    ancho: ex.ExifImageWidth || ex.ImageWidth || '', alto: ex.ExifImageHeight || ex.ImageHeight || ''
+  };
+}
+const EDITORES = /photoshop|lightroom|snapseed|picsart|gimp|canva|facetune|vsco|meitu|picsart|polarr|pixlr|photo ?editor|editor|remini|airbrush/i;
+async function procesarFoto(file, kind, origen) {
+  const galeria = origen === 'Galería';
+  const ex = await leerExif(file);
+  const obligatorio = galeria ? APP.EXIF_GALERIA_OBLIGATORIO : APP.EXIF_CAMARA_OBLIGATORIO;
+  if (obligatorio) {
+    const falta = [];
+    if (!ex.fecha) falta.push('fecha y hora');
+    if (ex.lat == null) falta.push('ubicación GPS');
+    if (falta.length) throw new Error(`no trae ${falta.join(' ni ')} en sus metadatos.`);
+  }
+  if (galeria && APP.GALERIA_MAX_HORAS > 0 && ex.fecha && (Date.now() - ex.fecha.getTime()) / 36e5 > APP.GALERIA_MAX_HORAS)
+    throw new Error(`fue tomada el ${fmtF(ex.fecha)}; solo se aceptan fotos de las últimas ${APP.GALERIA_MAX_HORAS} h.`);
+
+  let lat = ex.lat, lng = ex.lng, acc = null, fuenteUb;
+  if (lat != null) fuenteUb = 'GPS en metadatos de la foto (EXIF)';
   else {
     busy('Obteniendo ubicación del teléfono…');
     const p = await getPos(30000);
-    if (p) { lat = p.lat; lng = p.lng; acc = p.acc; fuenteUb = `GPS del teléfono al ${origen === 'Cámara' ? 'capturar' : 'subir'} (±${p.acc} m)`; }
+    if (p) { lat = p.lat; lng = p.lng; acc = p.acc; fuenteUb = `GPS del teléfono al capturar (±${p.acc} m) · la foto no trae GPS`; }
     else fuenteUb = 'Sin ubicación (GPS desactivado o sin permiso)';
   }
   let fecha, fuenteFecha;
-  const d = ex.DateTimeOriginal || ex.CreateDate || ex.ModifyDate;
-  if (d instanceof Date && !isNaN(d)) { fecha = d; fuenteFecha = 'EXIF'; }
-  else if (origen === 'Galería' && file.lastModified) { fecha = new Date(file.lastModified); fuenteFecha = 'Archivo'; }
+  if (ex.fecha) { fecha = ex.fecha; fuenteFecha = 'EXIF'; }
   else { fecha = new Date(); fuenteFecha = 'Reloj del teléfono'; }
 
   const alertas = [];
   if (lat == null) alertas.push('Foto sin geolocalización');
-  if (origen === 'Galería' && !/EXIF/.test(fuenteUb) && lat != null) alertas.push('Foto de galería sin GPS: se usó la ubicación actual del teléfono');
+  if (galeria && !ex.fecha) alertas.push('Foto de galería sin fecha en metadatos');
+  if (ex.software && EDITORES.test(ex.software)) alertas.push(`Foto procesada con editor: ${ex.software}`);
   const horas = (Date.now() - fecha.getTime()) / 36e5;
   if (horas > APP.HORAS_ALERTA) alertas.push(`Foto tomada hace ${horas >= 48 ? Math.round(horas / 24) + ' días' : Math.round(horas) + ' h'}`);
   if (horas < -0.5) alertas.push('Fecha de la foto posterior a la hora actual');
 
   const coords = lat != null ? fmtC(lat, lng) : '';
+  const camara = [ex.marca, ex.modelo.startsWith(ex.marca) ? ex.modelo.slice(ex.marca.length).trim() : ex.modelo].filter(Boolean).join(' ');
+  const exifTxt = [
+    `Fecha EXIF: ${ex.fecha ? fmtF(ex.fecha) : 'no trae'}`,
+    `GPS EXIF: ${ex.lat != null ? ex.lat.toFixed(6) + ', ' + ex.lng.toFixed(6) + (ex.alt != null ? ` (alt ${ex.alt} m)` : '') : 'no trae'}`,
+    camara && `Cámara: ${camara}`, ex.software && `Software: ${ex.software}`,
+    ex.ancho && ex.alto ? `Original: ${ex.ancho}×${ex.alto}` : '', `Archivo: ${file.name || '-'}`
+  ].filter(Boolean).join(' · ');
   busy('Sellando foto…');
   const etiqueta = kind === 'fachada' ? 'FACHADA' : 'EQUIPO';
   const img = await sellar(file, [
@@ -650,7 +689,7 @@ async function procesarFoto(file, kind, origen) {
     `${fmtF(fecha)} (${fuenteFecha}) · ${coords || 'sin ubicación'}`
   ]);
   return Object.freeze({ kind, img, fecha: fecha.toISOString(), fechaTxt: fmtF(fecha), fuenteFecha, lat, lng, acc, coords, fuenteUb, origen,
-    camara: [ex.Make, ex.Model].filter(Boolean).join(' '), alertasFijas: Object.freeze(alertas) });
+    camara, exifTxt, exifGps: ex.lat != null, exifFecha: !!ex.fecha, alertasFijas: Object.freeze(alertas) });
 }
 async function cargarImagen(file) {
   if (window.createImageBitmap) { try { return await createImageBitmap(file, { imageOrientation: 'from-image' }); } catch (e) {} }
@@ -678,7 +717,9 @@ function fotoHTML(p, i) {
     <dl class="kv"><dt>Fecha/hora</dt><dd>${esc(p.fechaTxt)} <small>(${esc(p.fuenteFecha)})</small></dd>
     <dt>Lat, Long</dt><dd>${p.coords ? `<a href="https://maps.google.com/?q=${p.lat},${p.lng}" target="_blank" rel="noopener">${esc(p.coords)}</a>` : '—'}</dd>
     <dt>Fuente</dt><dd>${esc(p.fuenteUb)}</dd>${d != null ? `<dt>Distancia OS</dt><dd>${d} m</dd>` : ''}
-    <dt>Origen</dt><dd>${esc(p.origen)}${p.camara ? ' · ' + esc(p.camara) : ''}</dd></dl>
+    <dt>Origen</dt><dd>${esc(p.origen)}${p.camara ? ' · ' + esc(p.camara) : ''}</dd>
+    <dt>Metadatos</dt><dd>${p.exifFecha ? '✅ Fecha' : '❌ Fecha'} · ${p.exifGps ? '✅ GPS' : '❌ GPS'}</dd></dl>
+    <details style="margin-top:6px;font-size:12px"><summary style="cursor:pointer;color:var(--tp);font-weight:700">Ver metadatos leídos</summary><div style="margin-top:4px;color:#3b3350">${esc(p.exifTxt).replace(/ · /g, '<br>')}</div></details>
     ${alertasDe(p).map(a => `<div class="alert">⚠️ ${esc(a)}</div>`).join('')}
     <div class="row"><button class="btn ghost sm" data-act="delFoto" data-kind="${p.kind}" data-i="${i}">🗑️ Quitar foto</button></div></div></div>`;
 }
@@ -798,7 +839,7 @@ function construirTexto() {
   return L.join('\n');
 }
 function todasAlertas() { const a = []; if (S.fachada) alertasDe(S.fachada).forEach(x => a.push('Fachada: ' + x)); S.equipos.forEach((p, i) => alertasDe(p).forEach(x => a.push(`Equipo ${i + 1}: ` + x))); return a; }
-function metaFoto(p) { return { img: p.img, fecha: p.fecha, fechaTxt: p.fechaTxt, fuenteFecha: p.fuenteFecha, lat: p.lat, lng: p.lng, acc: p.acc, coords: p.coords, fuenteUb: p.fuenteUb, origen: p.origen, dist: distOS(p) }; }
+function metaFoto(p) { return { img: p.img, fecha: p.fecha, fechaTxt: p.fechaTxt, fuenteFecha: p.fuenteFecha, lat: p.lat, lng: p.lng, acc: p.acc, coords: p.coords, fuenteUb: p.fuenteUb, origen: p.origen, dist: distOS(p), exif: p.exifTxt || '' }; }
 
 let ultimo = null;
 async function guardar() {
