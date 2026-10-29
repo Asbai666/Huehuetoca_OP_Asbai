@@ -289,7 +289,6 @@ pre.wa{white-space:pre-wrap;word-break:break-word;background:#e8f8ee;border:1px 
 const APP = {
   API_URL: 'https://script.google.com/macros/s/AKfycby8v4u0IIKmrK5PwHbVBt_q3pCYMSi0BbjuTdzXvM47JemU1JEzaTV1SIGY1Qx9BX0b/exec', // servicio Apps Script
   TOKEN: '',
-  ADMIN_TOKEN: 'HuehuetocaD29', // clave fija para "Cargar bitácora" (igual que CONFIG.ADMIN_TOKEN en Codigo.gs)
   LOGO_URL: '',       // ruta al logo oficial, p. ej. 'logo-totalplay.png' (en la misma carpeta)
   COORD_DEC: 3,       // formato xx.xxx, -xx.xxx
   DIST_ALERTA_M: 300, // alerta si la foto está más lejos que esto de la coordenada de la OS
@@ -1104,7 +1103,7 @@ async function subirBitacora() {
   try {
     for (let i = 0; i < bitRows.length; i += T) {
       busy(`Subiendo ${Math.min(i + T, bitRows.length)} de ${bitRows.length}…`);
-      const r = await api('cargarBase', {}, { admin: APP.ADMIN_TOKEN, rows: bitRows.slice(i, i + T) });
+      const r = await api('cargarBase', {}, { rows: bitRows.slice(i, i + T) });
       nuevos += r.nuevos; act += (r.existentes != null ? r.existentes : r.actualizados || 0); total = r.total;
     }
     $('#bitRes').innerHTML = `<div class="note ok">✅ Base actualizada: ${nuevos} OS nuevas agregadas, ${act} ya existían (sin cambios). Total en base: ${total}.</div>`;
