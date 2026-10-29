@@ -241,8 +241,6 @@ pre.wa{white-space:pre-wrap;word-break:break-word;background:#e8f8ee;border:1px 
     <div class="card">
       <h3>📥 Cargar bitácora</h3>
       <p class="hint">Elige el Excel de la bitácora de OS (el mismo que usa el tablero Distrito Huehuetoca AJM). Se leen Cuenta, OS, Nombre Técnico, Tipo, Subtipo, Fecha Última Agenda, Cluster, Latitud y Longitud. La geocerca se asigna por cluster igual que en el tablero. Solo se agregan las OS que aún no existen; lo que ya está en la base nunca se borra ni se modifica.</p>
-      <label for="cfgAdmin">Clave de administrador</label>
-      <input id="cfgAdmin" type="password" autocomplete="off" placeholder="ADMIN_TOKEN del script">
       <input type="file" id="inBit" accept=".xlsx,.xls,.xlsm,.csv" hidden>
       <button class="btn block" style="margin-top:12px" id="btnBit">📄 Elegir archivo Excel</button>
       <div id="bitRes"></div>
@@ -291,6 +289,7 @@ pre.wa{white-space:pre-wrap;word-break:break-word;background:#e8f8ee;border:1px 
 const APP = {
   API_URL: 'https://script.google.com/macros/s/AKfycby8v4u0IIKmrK5PwHbVBt_q3pCYMSi0BbjuTdzXvM47JemU1JEzaTV1SIGY1Qx9BX0b/exec', // servicio Apps Script
   TOKEN: '',
+  ADMIN_TOKEN: 'HuehuetocaD29', // clave fija para "Cargar bitácora" (igual que CONFIG.ADMIN_TOKEN en Codigo.gs)
   LOGO_URL: '',       // ruta al logo oficial, p. ej. 'logo-totalplay.png' (en la misma carpeta)
   COORD_DEC: 3,       // formato xx.xxx, -xx.xxx
   DIST_ALERTA_M: 300, // alerta si la foto está más lejos que esto de la coordenada de la OS
@@ -322,10 +321,10 @@ const FLUJOS = {
     { id: 'razon', label: 'Razón social / negocio', tipo: 'text', req: true },
     { id: 'contacto', label: 'Contacto en sitio', tipo: 'text' },
     { id: 'potencia', label: 'Potencia óptica (dBm)', tipo: 'text', im: 'decimal' } ] },
-  instalacion: { titulo: 'INSTALACIÓN', icon: '🛠️', sub: 'Alta de servicio', fachada: 'req', equipos: 'req', fibra: 'req', campos: [
+  instalacion: { titulo: 'INSTALACIÓN', icon: '🛠️', sub: 'Alta de servicio', fachada: 'req', equipos: 'req', fibra: 'req', cierre: 'req', campos: [
     { id: 'potencia', label: 'Potencia óptica (dBm)', tipo: 'text', im: 'decimal' },
     { id: 'paquete', label: 'Paquete', tipo: 'text' } ] },
-  soporte: { titulo: 'SOPORTE', icon: '🔧', sub: 'Falla / mantenimiento', fachada: 'req', equipos: 'opt', fibra: 'opt', campos: [
+  soporte: { titulo: 'SOPORTE', icon: '🔧', sub: 'Falla / mantenimiento', fachada: 'req', equipos: 'opt', fibra: 'opt', cierre: 'req', campos: [
     { id: 'falla', label: 'Falla reportada', tipo: 'select', req: true, op: ['Sin servicio', 'Intermitencia', 'Lentitud', 'Sin TV', 'Sin telefonía', 'Daño en fibra / acometida', 'Cambio de equipo', 'Otro'] },
     { id: 'solucion', label: 'Solución aplicada', tipo: 'textarea', req: true },
     { id: 'potencia', label: 'Potencia óptica (dBm)', tipo: 'text', im: 'decimal' } ] },
@@ -335,7 +334,7 @@ const FLUJOS = {
   extender: { pv: true, titulo: 'POST-VENTA · EXTENDER', icon: '📶', sub: 'Extender', fachada: 'req', equipos: 'req', fibra: null, campos: [
     { id: 'cantidad', label: 'Cantidad de extenders', tipo: 'number', req: true, im: 'numeric' },
     { id: 'ubic', label: 'Ubicación en el domicilio', tipo: 'text' } ] },
-  cambioDom: { pv: true, titulo: 'POST-VENTA · CAMBIO DE DOMICILIO', icon: '🏠', sub: 'Cambio de domicilio', fachada: 'req', equipos: 'req', fibra: 'req', campos: [
+  cambioDom: { pv: true, titulo: 'POST-VENTA · CAMBIO DE DOMICILIO', icon: '🏠', sub: 'Cambio de domicilio', fachada: 'req', equipos: 'req', fibra: 'req', cierre: 'req', campos: [
     { id: 'domAnt', label: 'Domicilio anterior', tipo: 'text' },
     { id: 'domNuevo', label: 'Domicilio nuevo', tipo: 'text', req: true },
     { id: 'potencia', label: 'Potencia óptica (dBm)', tipo: 'text', im: 'decimal' } ] },
@@ -368,7 +367,7 @@ async function copiar(t) {
 }
 
 /* ======================== AJUSTES ======================== */
-let cfg = (() => { const s = LSget('d29_cfg') || {}; return { apiUrl: s.apiUrl || APP.API_URL, token: s.token || APP.TOKEN, nombre: s.nombre || '', waNum: s.waNum || '', admin: s.admin || '' }; })();
+let cfg = (() => { const s = LSget('d29_cfg') || {}; return { apiUrl: s.apiUrl || APP.API_URL, token: s.token || APP.TOKEN, nombre: s.nombre || '', waNum: s.waNum || '' }; })();
 function demo() { return !cfg.apiUrl; }
 
 /* ======================== API ======================== */
@@ -417,13 +416,17 @@ async function demoApi(action, p, body) {
     const fotos = [];
     if (d.fachada) fotos.push(await mini(d.fachada.img));
     for (const q of d.equipos) fotos.push(await mini(q.img));
+    const cf = d.cierre && d.cierre.foto; let cierreIdx = -1;
+    if (cf) { cierreIdx = fotos.length; fotos.push(await mini(cf.img)); }
     caps.push({ folio: d.folio, registro: fmtF(new Date()), flujo: d.flujoTitulo, os: d.os, cuenta: d.cuenta, tecnico: b.tecnico || '', tipo: b.tipo || '', subtipo: b.subtipo || '',
       fachadaUrl: d.fachada ? 'demo:0' : '', fachadaFecha: d.fachada ? `${d.fachada.fechaTxt} (${d.fachada.fuenteFecha})` : '', fachadaCoords: d.fachada ? d.fachada.coords : '',
       fachadaFuente: d.fachada ? `${d.fachada.fuenteUb} · ${d.fachada.origen}` : '', fachadaDistancia: d.fachada && d.fachada.dist != null ? d.fachada.dist : '',
       equiposUrls: d.equipos.map((q, i) => 'demo:' + (i + (d.fachada ? 1 : 0))).join('\n'),
       equiposMeta: d.equipos.map((q, i) => `${i + 1}) ${q.fechaTxt} | ${q.coords || 'sin ubicación'} | ${q.fuenteUb}`).join('\n'),
       series: d.series.join('\n'), fibraTipo: d.fibra ? d.fibra.tipoTxt : '', fibraMetros: d.fibra ? d.fibra.metros : '', fibraQR: d.fibra ? d.fibra.qr : '',
-      campos: d.campos.map(c => c.label + ': ' + c.valor).join('\n'), comentarios: d.comentarios, alertas: d.alertas.join('\n'), capturista: d.capturista, texto, _fotos: fotos });
+      campos: d.campos.map(c => c.label + ': ' + c.valor).join('\n'), comentarios: d.comentarios, alertas: d.alertas.join('\n'), capturista: d.capturista, texto, _fotos: fotos,
+      cierreNomenclatura: d.cierre ? d.cierre.nomenclatura : '', cierrePuerto: d.cierre ? d.cierre.puerto : '',
+      cierreUrl: cierreIdx >= 0 ? 'demo:' + cierreIdx : '', cierreMeta: cf ? `${cf.fechaTxt} (${cf.fuenteFecha}) | ${cf.coords || 'sin ubicación'} | ${cf.dist != null ? cf.dist + ' m de la OS' : ''} | ${cf.fuenteUb}` : '' });
     let lista = caps.slice(-15);
     while (lista.length) { try { localStorage.setItem('d29_demo', JSON.stringify(lista)); break; } catch (e) { lista = lista.slice(1); } }
     return { ok: true, folio: d.folio, carpeta: '', texto };
@@ -440,7 +443,6 @@ function go(v, push = true) {
   $('#btnBack').hidden = v === 'home';
   $('#viewTitle').textContent = v === 'form' && S ? FLUJOS[S.flujo].titulo : (TITULOS[v] || '');
   if (v === 'ajustes') fillCfg();
-  if (v === 'carga') $('#cfgAdmin').value = cfg.admin || '';
   if (v === 'home') renderModeNote();
   window.scrollTo(0, 0);
   if (push) history.pushState({ v }, '', '#' + v);
@@ -491,12 +493,12 @@ function getPos(maxAge = 30000) {
 /* ======================== CAPTURA ======================== */
 let S = null;
 function iniciar(k) {
-  S = { flujo: k, folio: genFolio(), osDig: '', base: null, osEstado: '', cuentaManual: '', campos: {}, fachada: null, equipos: [], series: [], fibra: { tipo: '', metros: '', qr: '', qrImg: '' }, comentarios: '' };
+  S = { flujo: k, folio: genFolio(), osDig: '', base: null, osEstado: '', cuentaManual: '', campos: {}, fachada: null, equipos: [], series: [], fibra: { tipo: '', metros: '', qr: '', qrImg: '' }, cierre: null, cierreNom: '', cierrePuerto: '', comentarios: '' };
   renderForm();
   go('form');
   getPos(0); // pide permiso de ubicación desde el inicio
 }
-function dirty() { return S && (S.osDig || S.fachada || S.equipos.length || S.series.length || Object.values(S.campos).some(Boolean)); }
+function dirty() { return S && (S.osDig || S.fachada || S.cierre || S.cierreNom || S.equipos.length || S.series.length || Object.values(S.campos).some(Boolean)); }
 
 function tagFor(r) { return r === 'req' ? '<em class="tag">Obligatorio</em>' : '<em class="tag opt">Opcional</em>'; }
 function campoHTML(c) {
@@ -524,13 +526,22 @@ function renderForm() {
     <div class="row" style="margin-top:0"><input id="serieIn" placeholder="Escribe o escanea la serie" autocapitalize="characters" autocomplete="off"><button class="btn shrink" data-act="addSerie">＋</button></div>
     <div class="row"><button class="btn sec sm" data-act="scan" data-for="serie">▦ Escanear QR / barras</button><button class="btn sec sm" data-act="scanFile" data-for="serie">🖼️ Leer de una foto</button></div>
     <div class="chips" id="seriesBox"></div></div>`;
+  if (f.cierre) h += `<div class="card" id="secCierre"><h3>🔌 Datos del Cierre 2N ${tagFor(f.cierre)}</h3>
+    <label for="cierreNom">Nomenclatura${f.cierre === 'req' ? ' <span class="rq">*</span>' : ''}</label>
+    <input id="cierreNom" style="text-transform:uppercase" value="${esc(S.cierreNom)}" autocapitalize="characters" autocomplete="off" placeholder="Nomenclatura del cierre">
+    <label for="cierrePuerto">Puerto asignado por AAPO${f.cierre === 'req' ? ' <span class="rq">*</span>' : ''}</label>
+    <input id="cierrePuerto" style="text-transform:uppercase" value="${esc(S.cierrePuerto)}" autocapitalize="characters" autocomplete="off" placeholder="Ej. 5">
+    <label>Foto del Cierre 2N${f.cierre === 'req' ? ' <span class="rq">*</span>' : ''}</label>
+    <p class="hint" style="margin-top:0">Fecha, hora y ubicación se leen de los metadatos de la foto y quedan bloqueadas.</p>
+    <div id="cierreErr"></div><div id="cierreBox"></div>
+    <div class="row"><button class="btn" data-act="cam" data-kind="cierre">📷 Tomar foto</button><button class="btn sec" data-act="gal" data-kind="cierre">🖼️ Galería</button></div></div>`;
   if (f.fibra) h += `<div class="card" id="secFibra"><h3>🧵 Fibra utilizada ${tagFor(f.fibra)}</h3>
     <div class="seg" id="fibraSeg"><button data-act="fibra" data-v="unifibra">Unifibra</button><button data-act="fibra" data-v="precon">Preconectorizada</button>${f.fibra === 'opt' ? '<button data-act="fibra" data-v="">Ninguna</button>' : ''}</div>
     <div id="fibraBox"></div></div>`;
   h += `<div class="card"><h3>📝 Comentarios ${tagFor('opt')}</h3><textarea id="coment" placeholder="Observaciones adicionales">${esc(S.comentarios)}</textarea></div>
     <div class="stick"><button class="btn block big" data-act="guardar">💾 Guardar y generar texto</button></div>`;
   $('#formBody').innerHTML = h;
-  renderFotos('fachada'); renderFotos('equipo'); renderSeries(); renderFibra();
+  renderFotos('fachada'); renderFotos('equipo'); renderFotos('cierre'); renderSeries(); renderFibra();
 }
 
 /* ---- OS ---- */
@@ -561,7 +572,7 @@ async function buscarOS() {
     if (r.capturas && r.capturas.length) toast(`Esta OS ya tiene ${r.capturas.length} captura(s) registrada(s).`);
   } catch (e) { if (id !== osReq) return; S.osEstado = 'error'; S.osError = e.message; }
   $('#osData').innerHTML = renderBase();
-  renderFotos('fachada'); renderFotos('equipo'); // recalcula distancias
+  renderFotos('fachada'); renderFotos('equipo'); renderFotos('cierre'); // recalcula distancias
 }
 
 /* ---- Fotos con metadatos ---- */
@@ -577,7 +588,7 @@ document.addEventListener('click', e => {
   }
   else if (a === 'delFoto') {
     if (!confirm('¿Quitar esta foto?')) return;
-    if (b.dataset.kind === 'fachada') S.fachada = null; else S.equipos.splice(+b.dataset.i, 1);
+    if (b.dataset.kind === 'fachada') S.fachada = null; else if (b.dataset.kind === 'cierre') S.cierre = null; else S.equipos.splice(+b.dataset.i, 1);
     renderFotos(b.dataset.kind);
   }
   else if (a === 'addSerie') addSerie($('#serieIn').value);
@@ -602,6 +613,8 @@ document.addEventListener('input', e => {
   else if (t.dataset.campo) { S.campos[t.dataset.campo] = t.value; t.classList.remove('err'); }
   else if (t.id === 'ctaIn') { S.cuentaManual = t.value.trim(); t.classList.remove('err'); }
   else if (t.id === 'coment') S.comentarios = t.value;
+  else if (t.id === 'cierreNom') { S.cierreNom = t.value.toUpperCase(); t.classList.remove('err'); }
+  else if (t.id === 'cierrePuerto') { S.cierrePuerto = t.value.toUpperCase(); t.classList.remove('err'); }
   else if (t.id === 'fibraMetros') { S.fibra.metros = t.value; t.classList.remove('err'); }
 });
 document.addEventListener('change', e => { if (S && e.target.dataset.campo) S.campos[e.target.dataset.campo] = e.target.value; });
@@ -617,7 +630,7 @@ async function procesarArchivos(files, origen) {
     busy('Leyendo metadatos de la foto…');
     try {
       const p = await procesarFoto(file, kind, origen);
-      if (kind === 'fachada') S.fachada = p; else S.equipos.push(p);
+      if (kind === 'fachada') S.fachada = p; else if (kind === 'cierre') S.cierre = p; else S.equipos.push(p);
     } catch (err) { rechazos.push(`<b>${esc(file.name || 'foto')}</b>: ${esc(err.message)}`); }
   }
   busy(null); renderFotos(kind);
@@ -683,7 +696,7 @@ async function procesarFoto(file, kind, origen) {
     ex.ancho && ex.alto ? `Original: ${ex.ancho}×${ex.alto}` : '', `Archivo: ${file.name || '-'}`
   ].filter(Boolean).join(' · ');
   busy('Sellando foto…');
-  const etiqueta = kind === 'fachada' ? 'FACHADA' : 'EQUIPO';
+  const etiqueta = { fachada: 'FACHADA', equipo: 'EQUIPO', cierre: 'CIERRE 2N' }[kind] || 'FOTO';
   const img = await sellar(file, [
     `OS-${S.osDig || '________'} · ${etiqueta} · Totalplay D29 Huehuetoca`,
     `${fmtF(fecha)} (${fuenteFecha}) · ${coords || 'sin ubicación'}`
@@ -726,6 +739,7 @@ function fotoHTML(p, i) {
 function renderFotos(kind) {
   if (!S) return;
   if (kind === 'fachada') { const el = $('#fachadaBox'); if (el) el.innerHTML = S.fachada ? fotoHTML(S.fachada, 0) : ''; }
+  else if (kind === 'cierre') { const el = $('#cierreBox'); if (el) el.innerHTML = S.cierre ? fotoHTML(S.cierre, 0) : ''; }
   else { const el = $('#equiposBox'); if (el) el.innerHTML = S.equipos.map(fotoHTML).join(''); }
 }
 
@@ -805,6 +819,11 @@ function validar() {
   if (f.fachada === 'req' && !S.fachada) marca($('#secFachada'), 'Falta la foto de fachada');
   if (f.equipos === 'req' && !S.equipos.length) marca($('#secEquipos'), 'Falta la foto del equipo');
   if (f.equipos === 'req' && !S.series.length) marca($('#serieIn'), 'Captura al menos una serie');
+  if (f.cierre === 'req') {
+    if (!S.cierreNom.trim()) marca($('#cierreNom'), 'Nomenclatura del Cierre 2N');
+    if (!S.cierrePuerto.trim()) marca($('#cierrePuerto'), 'Puerto asignado por AAPO');
+    if (!S.cierre) marca($('#secCierre'), 'Falta la foto del Cierre 2N');
+  }
   if (f.fibra === 'req' && !S.fibra.tipo) marca($('#secFibra'), 'Indica el tipo de fibra');
   if (S.fibra.tipo === 'unifibra' && !(parseFloat(S.fibra.metros) > 0)) marca($('#fibraMetros'), 'Metros de unifibra');
   if (S.fibra.tipo === 'precon' && !S.fibra.qr) marca($('#secFibra'), 'Escanea el QR de la fibra');
@@ -827,6 +846,10 @@ function construirTexto() {
   const fotoLin = p => `${p.fechaTxt} · ${p.coords || 'sin ubicación'}`;
   if (S.fachada) { L.push(''); L.push(`📷 *Fachada:* ${fotoLin(S.fachada)}`); const d = distOS(S.fachada); if (d != null) L.push(`   _a ${d} m de la OS_`); }
   if (S.equipos.length) { if (!S.fachada) L.push(''); L.push(`📡 *Fotos de equipo (${S.equipos.length}):*`); S.equipos.forEach((p, i) => L.push(`   ${i + 1}. ${fotoLin(p)}`)); }
+  if (FLUJOS[S.flujo].cierre && (S.cierreNom || S.cierrePuerto || S.cierre)) {
+    L.push(`🔌 *Cierre 2N:* ${S.cierreNom.trim() || '-'} · *Puerto AAPO:* ${S.cierrePuerto.trim() || '-'}`);
+    if (S.cierre) { const d = distOS(S.cierre); L.push(`   📷 ${fotoLin(S.cierre)}${d != null ? ` · _a ${d} m de la OS_` : ''}`); }
+  }
   if (S.series.length) { L.push(`🔢 *${S.flujo === 'recoleccion' ? 'Series recolectadas' : 'Series'} (${S.series.length}):*`); S.series.forEach((s, i) => L.push(`   ${i + 1}. ${s}`)); }
   if (S.fibra.tipo === 'unifibra') L.push(`🧵 *Fibra:* Unifibra · ${S.fibra.metros} m`);
   if (S.fibra.tipo === 'precon') L.push(`🧵 *Fibra:* Preconectorizada · QR: ${S.fibra.qr}`);
@@ -838,7 +861,7 @@ function construirTexto() {
   add('Registro', fmtF(new Date()));
   return L.join('\n');
 }
-function todasAlertas() { const a = []; if (S.fachada) alertasDe(S.fachada).forEach(x => a.push('Fachada: ' + x)); S.equipos.forEach((p, i) => alertasDe(p).forEach(x => a.push(`Equipo ${i + 1}: ` + x))); return a; }
+function todasAlertas() { const a = []; if (S.fachada) alertasDe(S.fachada).forEach(x => a.push('Fachada: ' + x)); if (S.cierre) alertasDe(S.cierre).forEach(x => a.push('Cierre 2N: ' + x)); S.equipos.forEach((p, i) => alertasDe(p).forEach(x => a.push(`Equipo ${i + 1}: ` + x))); return a; }
 function metaFoto(p) { return { img: p.img, fecha: p.fecha, fechaTxt: p.fechaTxt, fuenteFecha: p.fuenteFecha, lat: p.lat, lng: p.lng, acc: p.acc, coords: p.coords, fuenteUb: p.fuenteUb, origen: p.origen, dist: distOS(p), exif: p.exifTxt || '' }; }
 
 let ultimo = null;
@@ -853,10 +876,11 @@ async function guardar() {
     folio: S.folio, flujo: S.flujo, flujoTitulo: f.titulo, os: 'OS-' + S.osDig, cuenta: datosBase().cuenta, base: S.base,
     campos: f.campos.filter(c => S.campos[c.id]).map(c => ({ id: c.id, label: c.label, valor: S.campos[c.id] })),
     fachada: S.fachada ? metaFoto(S.fachada) : null, equipos: S.equipos.map(metaFoto), series: S.series,
+    cierre: FLUJOS[S.flujo].cierre ? { nomenclatura: S.cierreNom.trim(), puerto: S.cierrePuerto.trim(), foto: S.cierre ? metaFoto(S.cierre) : null } : null,
     fibra: S.fibra.tipo ? { tipo: S.fibra.tipo, tipoTxt: S.fibra.tipo === 'unifibra' ? 'Unifibra' : 'Preconectorizada', metros: S.fibra.tipo === 'unifibra' ? S.fibra.metros : '', qr: S.fibra.tipo === 'precon' ? S.fibra.qr : '', qrImg: S.fibra.tipo === 'precon' ? S.fibra.qrImg : '' } : null,
     comentarios: S.comentarios.trim(), alertas: todasAlertas(), capturista: cfg.nombre, dispositivo: navigator.userAgent.slice(0, 180), texto
   };
-  ultimo = { texto, fotos: [S.fachada, ...S.equipos].filter(Boolean), os: 'OS-' + S.osDig, guardado: false };
+  ultimo = { texto, fotos: [S.fachada, ...S.equipos, S.cierre].filter(Boolean), os: 'OS-' + S.osDig, guardado: false };
   busy('Subiendo fotos y guardando…');
   try {
     if (demo()) throw new Error('Este teléfono no tiene configurada la URL del servicio.');
@@ -939,6 +963,8 @@ function evFotos(c) {
   const eu = lineas(c.equiposUrls), em = lineas(c.equiposMeta);
   eu.forEach((u, i) => { const p = (em[i] || '').replace(/^\d+\)\s*/, '').split('|').map(x => x.trim());
     out.push({ id: idOf(u), url: u, titulo: `📡 Equipo ${i + 1}`, fecha: p[0] || '', coords: p[1] || '', extra: p[2] || '' }); });
+  if (c.cierreUrl) { const p = String(c.cierreMeta || '').split('|').map(x => x.trim());
+    out.push({ id: idOf(c.cierreUrl), url: c.cierreUrl, titulo: '🔌 Cierre 2N', fecha: p[0] || '', coords: p[1] || '', extra: p.slice(2).filter(Boolean).join(' · ') }); }
   const qrUrl = lineas(c.fibraQR).find(x => /^https?:/.test(x));
   if (qrUrl) out.push({ id: driveId(qrUrl), url: qrUrl, titulo: '🧵 QR fibra', fecha: '', coords: '', extra: '' });
   return out.filter(f => f.id);
@@ -958,6 +984,7 @@ function capHTML(c) {
     <dl class="evdata">
       ${fila('Técnico', esc(c.tecnico))}
       ${series.length ? fila(`Series (${series.length})`, series.map((x, k) => `${k + 1}. ${esc(x)}`).join('\n')) : ''}
+      ${c.cierreNomenclatura || c.cierrePuerto ? fila('Cierre 2N', esc(c.cierreNomenclatura || '-') + `\nPuerto AAPO: ${esc(c.cierrePuerto || '-')}`) : ''}
       ${c.fibraTipo ? fila('Fibra', esc(c.fibraTipo) + (c.fibraMetros ? ` · ${esc(c.fibraMetros)} m` : '') + (qrTxt ? `\nQR: ${esc(qrTxt)}` : '')) : ''}
       ${campos}
       ${fila('Comentarios', esc(c.comentarios))}
@@ -1073,13 +1100,11 @@ $('#inBit').onchange = async e => {
   busy(null);
 };
 async function subirBitacora() {
-  cfg.admin = $('#cfgAdmin').value.trim(); LSset('d29_cfg', cfg);
-  if (!demo() && !cfg.admin) { toast('Escribe la clave de administrador'); $('#cfgAdmin').focus(); return; }
   const T = 800; let nuevos = 0, act = 0, total = 0;
   try {
     for (let i = 0; i < bitRows.length; i += T) {
       busy(`Subiendo ${Math.min(i + T, bitRows.length)} de ${bitRows.length}…`);
-      const r = await api('cargarBase', {}, { admin: cfg.admin, rows: bitRows.slice(i, i + T) });
+      const r = await api('cargarBase', {}, { admin: APP.ADMIN_TOKEN, rows: bitRows.slice(i, i + T) });
       nuevos += r.nuevos; act += (r.existentes != null ? r.existentes : r.actualizados || 0); total = r.total;
     }
     $('#bitRes').innerHTML = `<div class="note ok">✅ Base actualizada: ${nuevos} OS nuevas agregadas, ${act} ya existían (sin cambios). Total en base: ${total}.</div>`;
@@ -1090,7 +1115,7 @@ async function subirBitacora() {
 
 /* ======================== AJUSTES ======================== */
 function fillCfg() { $('#cfgNombre').value = cfg.nombre; $('#cfgWa').value = cfg.waNum; $('#cfgUrl').value = cfg.apiUrl; $('#cfgToken').value = cfg.token; $('#cfgMsg').innerHTML = ''; }
-function leerCfg() { cfg = { admin: cfg.admin, nombre: $('#cfgNombre').value.trim(), waNum: $('#cfgWa').value.trim(), apiUrl: $('#cfgUrl').value.trim(), token: $('#cfgToken').value.trim() }; LSset('d29_cfg', cfg); }
+function leerCfg() { cfg = { nombre: $('#cfgNombre').value.trim(), waNum: $('#cfgWa').value.trim(), apiUrl: $('#cfgUrl').value.trim(), token: $('#cfgToken').value.trim() }; LSset('d29_cfg', cfg); }
 function urlValida(u) { return !u || /^https:\/\/script\.google\.com\/(a\/macros\/[^/]+|macros)\/s\/[\w-]{20,}\/exec\/?$/.test(u); }
 const CHECK_URL = `<div class="note warn" style="text-align:left">Revisa en Apps Script:<br>
   1. Ejecutaste la función <b>setup</b> y aceptaste los permisos (deben aparecer las pestañas Base_OS y Evidencias en la hoja).<br>
