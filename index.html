@@ -160,6 +160,21 @@ pre.wa{white-space:pre-wrap;word-break:break-word;background:#e8f8ee;border:1px 
 .lb img{max-width:100%;max-height:72vh;border-radius:8px}
 .lb p{font-size:13px;text-align:center;margin:10px 0;max-width:560px;white-space:pre-wrap}
 .lb .row{width:100%;max-width:420px}
+.res.card{padding:12px}
+.res.main{border:2px solid var(--tp)}
+.res .rh b{font-size:17px}
+.res .rh small{display:block;color:var(--mute);font-size:12.5px;margin-top:2px}
+.when{font-style:normal;font-size:10.5px;font-weight:800;padding:3px 7px;border-radius:999px;margin-left:6px;vertical-align:2px;text-transform:uppercase;letter-spacing:.4px}
+.when.fut{background:#e3f0ff;color:#1f5fae}.when.hoy{background:#fff3e0;color:var(--warn)}.when.pas{background:#eee;color:#666}.when.sin{background:#f3f0f7;color:var(--mute)}
+.evs{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+.evs>summary{cursor:pointer;color:var(--tp);font-weight:800;font-size:14px}
+.ro{background:#f6f3fa!important;color:#3b3350;border-style:dashed!important}
+.osfix{font-size:22px;font-weight:900;letter-spacing:2px;color:var(--tp)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.fgrid .btn{font-size:13.5px;min-height:44px;padding:8px}
+.big2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.big2 .btn{min-height:64px;font-size:15.5px}
+.big2 .btn.on.si{background:var(--ok);color:#fff}.big2 .btn.on.no{background:var(--err);color:#fff}
 .foot{text-align:center;font-size:11.5px;color:var(--mute);margin-top:22px}
 .stick{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom));z-index:10}
 </style>
@@ -180,23 +195,32 @@ pre.wa{white-space:pre-wrap;word-break:break-word;background:#e8f8ee;border:1px 
   <section class="view" id="v-home">
     <div class="hero">
       <span id="heroLogo"></span>
-      <p><b>Registro de evidencias en campo.</b><br>Elige el tipo de visita, captura la OS y las fotos; al final se genera el texto para WhatsApp.</p>
+      <p><b>Evaluación y evidencias de OS.</b><br>Busca la orden de servicio o la cuenta para ver su historial, evaluar la visita y enviar el reporte por WhatsApp.</p>
     </div>
     <div id="modeNote"></div>
-    <div class="sect">Tipo de captura</div>
-    <div class="grid" id="menuGrid"></div>
+    <div class="card">
+      <h3>🔎 Buscar</h3>
+      <div class="seg" id="qSeg">
+        <button class="on" data-q="os">Orden de servicio</button>
+        <button data-q="cuenta">Cuenta</button>
+      </div>
+      <label id="qLabel" for="qIn">Orden de servicio</label>
+      <div class="row" style="margin-top:0">
+        <input id="qIn" inputmode="numeric" placeholder="OS-12345678" autocomplete="off">
+        <button class="btn shrink" id="btnQ">Buscar</button>
+      </div>
+    </div>
+    <div id="qRes"></div>
     <div class="sect">Base de datos</div>
     <div class="grid">
-      <button class="tile wide q" data-go="consulta"><span class="ic">🔎</span><span>Consultar OS / Cuenta<small>Ver todo lo capturado</small></span></button>
       <button class="tile wide" data-go="carga"><span class="ic">📥</span><span>Cargar bitácora<small>Actualiza la base de OS con el Excel del día (coordinación)</small></span></button>
     </div>
     <div class="foot">Totalplay · Distrito 29 Huehuetoca · Coordinación PI</div>
   </section>
 
-  <!-- ================= POST-VENTA ================= -->
-  <section class="view" id="v-postventa" hidden>
-    <div class="sect">Post-venta</div>
-    <div class="grid" id="pvGrid"></div>
+  <!-- ================= EVALUACIÓN ================= -->
+  <section class="view" id="v-eval" hidden>
+    <div id="evalBody"></div>
   </section>
 
   <!-- ================= FORMULARIO ================= -->
@@ -219,28 +243,13 @@ pre.wa{white-space:pre-wrap;word-break:break-word;background:#e8f8ee;border:1px 
     <button class="btn ghost block" id="btnNew">🏠 Nueva captura</button>
   </section>
 
-  <!-- ================= CONSULTA ================= -->
-  <section class="view" id="v-consulta" hidden>
-    <div class="card">
-      <h3>🔎 Consultar capturas</h3>
-      <div class="seg" id="qSeg">
-        <button class="on" data-q="os">Por OS</button>
-        <button data-q="cuenta">Por Cuenta</button>
-      </div>
-      <label id="qLabel">Orden de servicio</label>
-      <div class="row" style="margin-top:0">
-        <input id="qIn" inputmode="numeric" placeholder="OS-12345678" autocomplete="off">
-        <button class="btn shrink" id="btnQ">Buscar</button>
-      </div>
-    </div>
-    <div id="qRes"></div>
-  </section>
-
   <!-- ================= CARGA BITÁCORA ================= -->
   <section class="view" id="v-carga" hidden>
     <div class="card">
       <h3>📥 Cargar bitácora</h3>
-      <p class="hint">Elige el Excel de la bitácora de OS (el mismo que usa el tablero Distrito Huehuetoca AJM). Se leen Cuenta, OS, Nombre Técnico, Tipo, Subtipo, Fecha Última Agenda, Cluster, Latitud y Longitud. La geocerca se asigna por cluster igual que en el tablero. Solo se agregan las OS que aún no existen; lo que ya está en la base nunca se borra ni se modifica.</p>
+      <p class="hint">Elige el Excel de la bitácora de OS (el mismo que usa el tablero Distrito Huehuetoca AJM). Se leen Cuenta, OS, Nombre Cliente (titular), Nombre Técnico, Nombre Supervisor, Distrito, Tipo, Subtipo, Fecha Última Agenda, Estatus, Cluster, Latitud, Longitud y, si vienen, columnas de teléfono. La geocerca se asigna por cluster igual que en el tablero. Las OS nuevas se agregan; en las que ya existen solo se llenan los datos que estaban vacíos. Nada de lo ya cargado se borra ni se sobrescribe.</p>
+      <label for="cfgAdmin">Clave de administrador</label>
+      <input id="cfgAdmin" type="password" autocomplete="off" placeholder="ADMIN_TOKEN del script">
       <input type="file" id="inBit" accept=".xlsx,.xls,.xlsm,.csv" hidden>
       <button class="btn block" style="margin-top:12px" id="btnBit">📄 Elegir archivo Excel</button>
       <div id="bitRes"></div>
@@ -366,7 +375,7 @@ async function copiar(t) {
 }
 
 /* ======================== AJUSTES ======================== */
-let cfg = (() => { const s = LSget('d29_cfg') || {}; return { apiUrl: s.apiUrl || APP.API_URL, token: s.token || APP.TOKEN, nombre: s.nombre || '', waNum: s.waNum || '' }; })();
+let cfg = (() => { const s = LSget('d29_cfg') || {}; return { apiUrl: s.apiUrl || APP.API_URL, token: s.token || APP.TOKEN, nombre: s.nombre || '', waNum: s.waNum || '', admin: s.admin || '' }; })();
 function demo() { return !cfg.apiUrl; }
 
 /* ======================== API ======================== */
@@ -388,8 +397,8 @@ async function api(action, params = {}, body = null) {
 }
 /* Datos de ejemplo para probar sin backend */
 const DEMO_BASE = [
-  { os: 'OS-12345678', cuenta: '0101234567', tecnico: 'Técnico Demo Uno', tipo: 'INSTALACION', subtipo: 'FTTH RESIDENCIAL', fechaAsignacion: '24/10/2026 08:15', geocerca: 'HUEHUETOCA CENTRO', cluster: 'HTC-03', lat: 19.8336, lng: -99.2035 },
-  { os: 'OS-87654321', cuenta: '0101234567', tecnico: 'Técnico Demo Dos', tipo: 'SOPORTE', subtipo: 'SIN SERVICIO', fechaAsignacion: '20/10/2026 10:40', geocerca: 'HUEHUETOCA CENTRO', cluster: 'HTC-03', lat: 19.8336, lng: -99.2035 }
+  { os: 'OS-12345678', cuenta: '0101234567', tecnico: 'Técnico Demo Uno', tipo: 'Instalación', subtipo: 'Instalación Huawei', fechaAsignacion: '24/10/2026 08:15', geocerca: 'HUEHUETOCA G', cluster: 'HUEHUETOCA_A', lat: 19.8336, lng: -99.2035, titular: 'Cliente Demo', supervisor: 'LUIS MENESES', distrito: 'HUEHUETOCA', estatus: 'Asignada', telTecnico: '', telCliente: '5511112222' },
+  { os: 'OS-87654321', cuenta: '0101234567', tecnico: 'Técnico Demo Dos', tipo: 'Soporte', subtipo: 'Sin servicio', fechaAsignacion: '20/10/2026 10:40', geocerca: 'HUEHUETOCA G', cluster: 'HUEHUETOCA_A', lat: 19.8336, lng: -99.2035, titular: 'Cliente Demo', supervisor: 'LUIS MENESES', distrito: 'HUEHUETOCA', estatus: 'Terminada', telTecnico: '5543847698', telCliente: '' }
 ].map(b => ({ ...b, coords: fmtC(b.lat, b.lng) }));
 async function demoApi(action, p, body) {
   await new Promise(r => setTimeout(r, 400));
@@ -399,13 +408,15 @@ async function demoApi(action, p, body) {
   const idn = v => String(v || '').replace(/\s/g, '').replace(/^0+/, '');
   if (action === 'ping') return { ok: true, app: 'MODO DEMO' };
   if (action === 'foto') { const m = /^demo:(\d+)@(.+)$/.exec(p.id); const c = m && caps.find(x => x.folio === m[2]); const src = c && c._fotos && c._fotos[+m[1]]; if (!src) throw new Error('Foto no disponible'); return { ok: true, data: src }; }
-  if (action === 'buscarOS') return { ok: true, base: BASE.find(b => dg(b.os) === dg(p.os)) || null, capturas: caps.filter(c => dg(c.os) === dg(p.os)).reverse() };
+  if (action === 'buscarOS') { const b = BASE.find(x => dg(x.os) === dg(p.os)) || null;
+    return { ok: true, base: b, ordenes: b ? BASE.filter(x => idn(x.cuenta) === idn(b.cuenta)) : [], capturas: caps.filter(c => dg(c.os) === dg(p.os) || (b && idn(c.cuenta) === idn(b.cuenta))).reverse() }; }
   if (action === 'buscarCuenta') return { ok: true, ordenes: BASE.filter(b => idn(b.cuenta) === idn(p.cuenta)), capturas: caps.filter(c => idn(c.cuenta) === idn(p.cuenta)).reverse() };
   if (action === 'cargarBase') {
     const prev = LSget('d29_demo_base') || [], m = {};
     prev.forEach(b => m[dg(b.os)] = b);
     body.rows.forEach(r => { if (m[dg(r.os)]) return; const lat = parseFloat(r.lat), lng = parseFloat(r.lon), ok = isFinite(lat) && isFinite(lng);
-      m[dg(r.os)] = { os: 'OS-' + dg(r.os), cuenta: String(r.cuenta), tecnico: r.tecnico, tipo: r.tipo, subtipo: r.subtipo, fechaAsignacion: r.fecha, geocerca: r.geocerca, cluster: r.cluster, lat: ok ? lat : null, lng: ok ? lng : null, coords: ok ? fmtC(lat, lng) : '' }; });
+      m[dg(r.os)] = { os: 'OS-' + dg(r.os), cuenta: String(r.cuenta), tecnico: r.tecnico, tipo: r.tipo, subtipo: r.subtipo, fechaAsignacion: r.fecha, geocerca: r.geocerca, cluster: r.cluster, lat: ok ? lat : null, lng: ok ? lng : null, coords: ok ? fmtC(lat, lng) : '',
+        titular: r.titular, supervisor: r.supervisor, distrito: r.distrito, estatus: r.estatus, telTecnico: r.telTecnico, telCliente: r.telCliente }; });
     const all = Object.values(m); LSset('d29_demo_base', all.slice(-3000));
     return { ok: true, nuevos: all.length - prev.length, existentes: body.rows.length - (all.length - prev.length), omitidos: 0, total: all.length };
   }
@@ -435,21 +446,23 @@ async function demoApi(action, p, body) {
 
 /* ======================== NAVEGACIÓN ======================== */
 let cur = 'home';
-const TITULOS = { carga: 'Cargar bitácora', home: 'Distrito 29 Huehuetoca · Evidencias', postventa: 'Post-venta', consulta: 'Consulta de base', ajustes: 'Ajustes', done: 'Captura lista' };
+const TITULOS = { carga: 'Cargar bitácora', home: 'Distrito 29 Huehuetoca · Evidencias', eval: 'Evaluar OS', ajustes: 'Ajustes', done: 'Captura lista' };
 function go(v, push = true) {
   document.querySelectorAll('.view').forEach(e => e.hidden = e.id !== 'v-' + v);
   cur = v;
   $('#btnBack').hidden = v === 'home';
   $('#viewTitle').textContent = v === 'form' && S ? FLUJOS[S.flujo].titulo : (TITULOS[v] || '');
   if (v === 'ajustes') fillCfg();
+  if (v === 'carga') $('#cfgAdmin').value = cfg.admin || '';
   if (v === 'home') renderModeNote();
+  if (v === 'eval' && S) renderEval();
   window.scrollTo(0, 0);
   if (push) history.pushState({ v }, '', '#' + v);
 }
 window.addEventListener('popstate', e => {
   const v = (e.state && e.state.v) || 'home';
-  if (cur === 'form' && v !== 'form' && dirty() && !confirm('¿Salir de la captura? Se perderán los datos.')) { history.pushState({ v: 'form' }, '', '#form'); return; }
-  if (v === 'form' && !S) return go('home', false);
+  if ((cur === 'form' || cur === 'eval') && v === 'home' && dirty() && !confirm('¿Salir de la captura? Se perderán los datos.')) { history.pushState({ v: cur }, '', '#' + cur); return; }
+  if ((v === 'form' || v === 'eval') && !S) return go('home', false);
   go(v, false);
 });
 $('#btnBack').onclick = () => history.back();
@@ -457,10 +470,7 @@ $('#btnCfg').onclick = () => go('ajustes');
 document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) { e.preventDefault(); go(g.dataset.go); } });
 
 /* ======================== MENÚ ======================== */
-function tile(k) { const f = FLUJOS[k]; return `<button class="tile" data-flujo="${k}"><span class="ic">${f.icon}</span><span>${esc(f.titulo.replace('POST-VENTA · ', ''))}<small>${esc(f.sub)}</small></span></button>`; }
-$('#menuGrid').innerHTML = MENU.map(tile).join('') + `<button class="tile wide pv" data-go="postventa"><span class="ic">🧩</span><span>POST-VENTA<small>Addon · Extender · Cambio de domicilio · Recolección</small></span></button>`;
-$('#pvGrid').innerHTML = PV.map(tile).join('');
-document.addEventListener('click', e => { const t = e.target.closest('[data-flujo]'); if (t) iniciar(t.dataset.flujo); });
+document.addEventListener('click', e => { const t = e.target.closest('[data-flujo]'); if (t && S) continuar(t.dataset.flujo); });
 function renderModeNote() {
   $('#modeNote').innerHTML = (demo() ? `<div class="note err" style="margin-bottom:6px">⚠️ Este teléfono NO está conectado al servicio: las capturas no llegan a la base. <a href="#" data-go="ajustes">Configurar la URL</a></div>`
     : (!cfg.nombre ? `<div class="note info">Agrega tu nombre en <a href="#" data-go="ajustes">Ajustes</a> para que aparezca en los reportes.</div>` : '')) + '<div id="pendNote"></div>';
@@ -497,7 +507,7 @@ function iniciar(k) {
   go('form');
   getPos(0); // pide permiso de ubicación desde el inicio
 }
-function dirty() { return S && (S.osDig || S.fachada || S.cierre || S.cierreNom || S.equipos.length || S.series.length || Object.values(S.campos).some(Boolean)); }
+function dirty() { return S && ((S.desdeEval ? false : S.osDig) || (S.contacto && (S.contacto.motivo || S.contacto.tel)) || S.fachada || S.cierre || S.cierreNom || S.equipos.length || S.series.length || Object.values(S.campos).some(Boolean)); }
 
 function tagFor(r) { return r === 'req' ? '<em class="tag">Obligatorio</em>' : '<em class="tag opt">Opcional</em>'; }
 function campoHTML(c) {
@@ -508,7 +518,12 @@ function campoHTML(c) {
 }
 function renderForm() {
   const f = FLUJOS[S.flujo];
-  let h = `<div class="card" id="secOS"><h3>🧾 Orden de servicio ${tagFor('req')}</h3>
+  const ct = S.contacto || {};
+  let h = S.desdeEval
+    ? `<div class="card" id="secOS"><h3>🧾 Orden de servicio</h3><div class="osfix">OS-${esc(S.osDig)}</div>
+      <div id="osData">${renderBase()}</div>
+      ${ct.localizado === 'Sí' ? `<div class="note ok">📞 Cliente localizado${ct.tel ? ' · Tel: ' + esc(ct.tel) : ''}</div>` : ''}</div>`
+    : `<div class="card" id="secOS"><h3>🧾 Orden de servicio ${tagFor('req')}</h3>
     <div class="osbox" id="osBox"><span>OS-</span><input id="osIn" inputmode="numeric" maxlength="12" placeholder="12345678" autocomplete="off" value="${S.osDig}"></div>
     <div class="errmsg" id="osErr"></div>
     <div id="osData">${renderBase()}</div></div>`;
@@ -547,11 +562,12 @@ function renderForm() {
 function renderBase() {
   if (S.osEstado === 'buscando') return `<div class="note info">Buscando OS-${esc(S.osDig)} en la base…</div>`;
   if (S.osEstado === 'error') return `<div class="note err">${esc(S.osError)}</div><button class="btn sec block" style="margin-top:8px" data-act="buscarOS">Reintentar</button>`;
-  if (S.base) {
-    const b = S.base;
+  if (S.base || S.desdeEval) {
+    const b = datosOS();
     const fila = (k, v) => v ? `<dt>${k}</dt><dd>${v}</dd>` : '';
-    return `<div class="basecard"><div class="h"><span>DATOS DE LA BASE</span><em class="tag lock">🔒 Solo lectura</em></div><dl class="kv">
-      ${fila('Cuenta', esc(b.cuenta))}${fila('OS', esc(b.os))}${fila('Técnico', esc(b.tecnico))}${fila('Tipo', esc(b.tipo))}${fila('Subtipo', esc(b.subtipo))}
+    return `<div class="basecard"><div class="h"><span>${S.base ? 'DATOS DE LA BASE' : 'DATOS CAPTURADOS'}</span><em class="tag lock">🔒 Solo lectura</em></div><dl class="kv">
+      ${fila('Cuenta', esc(b.cuenta))}${fila('OS', esc(b.os))}${fila('Titular', esc(b.titular))}${fila('Técnico', esc(b.tecnico))}${fila('Tel. técnico', esc(b.telTecnico))}
+      ${fila('Supervisor', esc(b.supervisor))}${fila('Distrito', esc(b.distrito))}${fila('Tipo', esc(b.tipo))}${fila('Subtipo', esc(b.subtipo))}
       ${fila('Asignación', esc(b.fechaAsignacion))}${fila('Geocerca', esc(b.geocerca))}${fila('Cluster', esc(b.cluster))}
       ${fila('Lat, Long', b.coords ? `<a href="https://maps.google.com/?q=${b.lat},${b.lng}" target="_blank" rel="noopener">${esc(b.coords)}</a>` : '')}</dl></div>`;
   }
@@ -598,6 +614,10 @@ document.addEventListener('click', e => {
   else if (a === 'qrManual') { const t = prompt('Escribe el código de la fibra:'); if (t && t.trim()) { S.fibra.qr = t.trim(); S.fibra.qrFuente = 'Manual'; renderFibra(); } }
   else if (a === 'buscarOS') buscarOS();
   else if (a === 'guardar') guardar();
+  else if (a === 'loc') { S.contacto.localizado = b.dataset.v; document.querySelectorAll('[data-act="loc"]').forEach(x => x.classList.toggle('on', x === b)); renderLoc(); pintarEval(); }
+  else if (a === 'waEval') { const f = faltanEval(); if (f.length) return marcarFaltas(f); guardarTelDir(); enviarWA(textoEval()); }
+  else if (a === 'cpEval') copiar(textoEval()).then(ok => toast(ok ? 'Texto copiado' : 'No se pudo copiar'));
+  else if (a === 'guardarIloc') guardarIloc();
 });
 document.addEventListener('input', e => {
   if (!S) return;
@@ -740,6 +760,7 @@ function renderFotos(kind) {
   if (kind === 'fachada') { const el = $('#fachadaBox'); if (el) el.innerHTML = S.fachada ? fotoHTML(S.fachada, 0) : ''; }
   else if (kind === 'cierre') { const el = $('#cierreBox'); if (el) el.innerHTML = S.cierre ? fotoHTML(S.cierre, 0) : ''; }
   else { const el = $('#equiposBox'); if (el) el.innerHTML = S.equipos.map(fotoHTML).join(''); }
+  if (cur === 'eval') pintarEval();
 }
 
 /* ---- Series ---- */
@@ -810,7 +831,8 @@ function recibirCodigo(txt, fuente) {
 function validar() {
   const f = FLUJOS[S.flujo], errs = [];
   const marca = (el, msg) => { if (el) el.classList.add('err'); errs.push({ el, msg }); };
-  if (S.osDig.length !== 8) { $('#osErr').textContent = 'Captura la OS con 8 dígitos (OS-XXXXXXXX).'; marca($('#osBox'), 'OS'); }
+  if (S.desdeEval) { if (!datosOS().cuenta) marca($('#secOS'), 'Falta la cuenta (regresa a la evaluación)'); }
+  else if (S.osDig.length !== 8) { $('#osErr').textContent = 'Captura la OS con 8 dígitos (OS-XXXXXXXX).'; marca($('#osBox'), 'OS'); }
   else if (S.osEstado === 'buscando') marca($('#osBox'), 'Espera a que termine la búsqueda de la OS');
   else if (!S.base && S.osEstado !== 'noexiste') marca($('#osBox'), 'No se pudo consultar la OS. Toca “Reintentar”.');
   else if (!S.base && !S.cuentaManual) marca($('#ctaIn'), 'Captura la cuenta');
@@ -829,15 +851,29 @@ function validar() {
   setTimeout(() => document.querySelectorAll('.card.err').forEach(c => c.classList.remove('err')), 2500);
   return errs;
 }
-function datosBase() { return S.base || { os: 'OS-' + S.osDig, cuenta: S.cuentaManual }; }
+function datosBase() { return datosOS(); }
+function datosOS() {
+  const b = S.base || {}, m = S.manual || {}, o = { ...b, os: 'OS-' + S.osDig };
+  CAMPOS_OS.forEach(c => { const v = String(m[c.k] == null ? '' : m[c.k]).trim(); if (v && (!b[c.k] || c.editable)) o[c.k] = v; else o[c.k] = b[c.k] || ''; });
+  if (!o.cuenta && S.cuentaManual) o.cuenta = S.cuentaManual;
+  return o;
+}
+function scriptBase(m) {
+  const v = x => String(x == null ? '' : x).trim() || 'Sin dato';
+  return [`*Tipo de orden:* ${v(m.tipo)}`, `*Cuenta*:`, v(m.cuenta), `*Orden de servicio*:`, ` ${m.os}`,
+    `*Nombre del titular:* ${v(m.titular)}`, `*Nombre del Supervisor* : ${v(m.supervisor)}`, `*Nombre del Técnico*: ${v(m.tecnico)}`,
+    `*Teléfono del Técnico*:`, v(m.telTecnico), `*Distrito*:`, v(m.distrito)];
+}
 function construirTexto() {
   const f = FLUJOS[S.flujo], b = datosBase(), L = [];
   const add = (k, v) => { if (v !== undefined && v !== null && String(v).trim() !== '') L.push(`*${k}:* ${v}`); };
   L.push('*TOTALPLAY · DISTRITO 29 HUEHUETOCA*');
   L.push(`${f.icon} *${f.titulo}*`);
   L.push('━━━━━━━━━━━━━━');
-  add('OS', 'OS-' + S.osDig); add('Cuenta', b.cuenta); add('Técnico', b.tecnico);
-  add('Tipo', [b.tipo, b.subtipo].filter(Boolean).join(' / '));
+  L.push(...scriptBase(b));
+  const ct = S.contacto || {};
+  if (ct.localizado) L.push(`*Cliente localizado:* ${ct.localizado}${ct.tel ? ' · Tel: ' + ct.tel : ''}`);
+  add('Subtipo', b.subtipo);
   add('Asignación', b.fechaAsignacion); add('Geocerca', b.geocerca); add('Cluster', b.cluster); add('Coordenadas OS', b.coords);
   if (!S.base) L.push('⚠️ _OS no encontrada en la base_');
   const campos = f.campos.filter(c => S.campos[c.id]);
@@ -872,14 +908,18 @@ async function guardar() {
   }
   const f = FLUJOS[S.flujo], texto = construirTexto();
   const data = {
-    folio: S.folio, flujo: S.flujo, flujoTitulo: f.titulo, os: 'OS-' + S.osDig, cuenta: datosBase().cuenta, base: S.base,
+    folio: S.folio, flujo: S.flujo, flujoTitulo: f.titulo, os: 'OS-' + S.osDig, cuenta: datosOS().cuenta, base: datosOS(),
+    contacto: { localizado: (S.contacto || {}).localizado || '', tel: (S.contacto || {}).tel || '' },
     campos: f.campos.filter(c => S.campos[c.id]).map(c => ({ id: c.id, label: c.label, valor: S.campos[c.id] })),
     fachada: S.fachada ? metaFoto(S.fachada) : null, equipos: S.equipos.map(metaFoto), series: S.series,
     cierre: FLUJOS[S.flujo].cierre ? { nomenclatura: S.cierreNom.trim(), puerto: S.cierrePuerto.trim(), foto: S.cierre ? metaFoto(S.cierre) : null } : null,
     fibra: S.fibra.tipo ? { tipo: S.fibra.tipo, tipoTxt: S.fibra.tipo === 'unifibra' ? 'Unifibra' : 'Preconectorizada', metros: S.fibra.tipo === 'unifibra' ? S.fibra.metros : '', qr: S.fibra.tipo === 'precon' ? S.fibra.qr : '', qrImg: S.fibra.tipo === 'precon' ? S.fibra.qrImg : '' } : null,
     comentarios: S.comentarios.trim(), alertas: todasAlertas(), capturista: cfg.nombre, dispositivo: navigator.userAgent.slice(0, 180), texto
   };
-  ultimo = { texto, fotos: [S.fachada, ...S.equipos, S.cierre].filter(Boolean), os: 'OS-' + S.osDig, guardado: false };
+  await persistir(data, texto, [S.fachada, ...S.equipos, S.cierre].filter(Boolean));
+}
+async function persistir(data, texto, fotos) {
+  ultimo = { texto, fotos, os: data.os, guardado: false };
   busy('Subiendo fotos y guardando…');
   try {
     if (demo()) throw new Error('Este teléfono no tiene configurada la URL del servicio.');
@@ -892,7 +932,7 @@ async function guardar() {
     $('#doneStatus').innerHTML = guardadaLocal
       ? `<div class="note warn" style="margin:0 0 12px">⏳ No se pudo subir todavía (${esc(e.message)})<br>La captura quedó guardada en este teléfono y se subirá sola en cuanto haya conexión con el servicio. No la borres ni desinstales el navegador.</div>`
       : `<div class="note err" style="margin:0 0 12px">❌ No se guardó: ${esc(e.message)}<br><button class="btn sm" style="margin-top:8px" id="btnRetry">Reintentar guardado</button></div>`;
-    setTimeout(() => { const b = $('#btnRetry'); if (b) b.onclick = () => { go('form'); guardar(); }; });
+    setTimeout(() => { const b = $('#btnRetry'); if (b) b.onclick = () => persistir(data, texto, fotos); });
   }
   busy(null);
   $('#waText').textContent = ultimo.texto;
@@ -909,46 +949,207 @@ $('#btnShare').onclick = async () => {
     try { await navigator.share({ files, text: ultimo.texto }); toast('Si WhatsApp no pegó el texto, mantén presionado y pega: ya está copiado.', 5000); } catch (e) {}
   } else toast('Este teléfono no permite compartir fotos desde el navegador. Usa “Enviar por WhatsApp”.', 4500);
 };
-$('#btnNew').onclick = () => { S = null; ultimo = null; history.replaceState({ v: 'home' }, '', '#home'); go('home', false); };
+$('#btnNew').onclick = () => { S = null; ultimo = null; history.replaceState({ v: 'home' }, '', '#home'); go('home', false); if ($('#qIn').value.trim()) consultar(); };
 
-/* ======================== CONSULTA ======================== */
+/* ======================== BÚSQUEDA E HISTORIAL ======================== */
 let qModo = 'os';
+const ordenesVistas = {};
 $('#qSeg').onclick = e => { const b = e.target.closest('button'); if (!b) return; setQModo(b.dataset.q); };
 function setQModo(m) { qModo = m; document.querySelectorAll('#qSeg button').forEach(x => x.classList.toggle('on', x.dataset.q === m)); $('#qLabel').textContent = m === 'os' ? 'Orden de servicio' : 'Número de cuenta'; $('#qIn').placeholder = m === 'os' ? 'OS-12345678' : '0101234567'; }
 $('#qIn').addEventListener('input', e => { if (/^os/i.test(e.target.value) && qModo !== 'os') setQModo('os'); });
 $('#qIn').addEventListener('keydown', e => { if (e.key === 'Enter') consultar(); });
 $('#btnQ').onclick = consultar;
+function fechaDe(t) { const m = /(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/.exec(t || ''); return m ? new Date(+m[3], +m[2] - 1, +m[1], +(m[4] || 0), +(m[5] || 0)) : null; }
+function cuandoDe(t) {
+  const d = fechaDe(t); if (!d) return { k: 'sin', txt: 'Sin fecha' };
+  const h = new Date(), a = new Date(h.getFullYear(), h.getMonth(), h.getDate()), b = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  return b > a ? { k: 'fut', txt: 'Próxima' } : +b === +a ? { k: 'hoy', txt: 'Hoy' } : { k: 'pas', txt: 'Pasada' };
+}
 async function consultar() {
   const raw = $('#qIn').value.trim(); if (!raw) return;
   const out = $('#qRes');
-  let params;
-  if (qModo === 'os') { const d = raw.replace(/\D/g, ''); if (d.length !== 8) return toast('La OS debe tener 8 dígitos'); params = { os: 'OS-' + d }; }
+  let params, osBuscada = '';
+  if (qModo === 'os') { const d = raw.replace(/\D/g, ''); if (d.length !== 8) return toast('La OS debe tener 8 dígitos'); osBuscada = 'OS-' + d; params = { os: osBuscada }; }
   else params = { cuenta: raw };
   out.innerHTML = `<div class="note info">Buscando…</div>`;
   try {
     const r = await api(qModo === 'os' ? 'buscarOS' : 'buscarCuenta', params);
     const grupos = {};
-    const ordenes = qModo === 'os' ? (r.base ? [r.base] : []) : (r.ordenes || []);
-    ordenes.forEach(b => grupos[b.os] = { base: b, caps: [] });
-    (r.capturas || []).forEach(c => { const k = c.os; (grupos[k] = grupos[k] || { base: null, caps: [] }).caps.push(c); });
+    [r.base, ...(r.ordenes || [])].filter(Boolean).forEach(b => { grupos[b.os] = grupos[b.os] || { base: b, caps: [] }; ordenesVistas[b.os] = b; });
+    (r.capturas || []).forEach(c => { (grupos[c.os] = grupos[c.os] || { base: null, caps: [] }).caps.push(c); });
+    if (osBuscada && !grupos[osBuscada]) grupos[osBuscada] = { base: null, caps: [] };
+    if (osBuscada && !r.base) delete ordenesVistas[osBuscada];
     const keys = Object.keys(grupos);
-    if (!keys.length) { out.innerHTML = (r.baseError ? `<div class="note warn">Base de OS: ${esc(r.baseError)}</div>` : '') + `<div class="note warn">Sin OS ni evidencias guardadas para ${esc(raw)}.</div>`; return; }
-    const total = keys.reduce((n, k) => n + grupos[k].caps.length, 0);
     capTextos = [];
-    out.innerHTML = (r.baseError ? `<div class="note warn">Base de OS: ${esc(r.baseError)}</div>` : '')
-      + `<div class="sect">${keys.length} OS · ${total} captura(s)</div>` + keys.map((k, i) => resHTML(k, grupos[k], keys.length === 1 || i === 0)).join('');
-    out.querySelectorAll('details[open]').forEach(cargarFotos);
+    const aviso = r.baseError ? `<div class="note warn">Base de OS: ${esc(r.baseError)}</div>` : '';
+    if (!keys.length) { out.innerHTML = aviso + `<div class="note warn">Sin OS ni evidencias para la cuenta ${esc(raw)}. Busca por orden de servicio para capturarla manualmente.</div>`; return; }
+    const fecha = k => { const g = grupos[k]; const d = fechaDe(g.base && g.base.fechaAsignacion) || fechaDe(g.caps[0] && g.caps[0].registro); return d ? d.getTime() : 0; };
+    keys.sort((a, b) => (b === osBuscada) - (a === osBuscada) || fecha(b) - fecha(a));
+    const cnt = { fut: 0, hoy: 0, pas: 0 };
+    keys.forEach(k => { const w = cuandoDe(grupos[k].base && grupos[k].base.fechaAsignacion).k; if (cnt[w] != null) cnt[w]++; });
+    const cuenta = (r.base && r.base.cuenta) || (keys.map(k => grupos[k].base).find(Boolean) || {}).cuenta || (qModo === 'cuenta' ? raw : '');
+    const resumen = `<div class="sect">${cuenta ? 'Cuenta ' + esc(cuenta) + ' · ' : ''}${keys.length} servicio${keys.length === 1 ? '' : 's'}${cnt.fut ? ` · ${cnt.fut} próxima${cnt.fut === 1 ? '' : 's'}` : ''}${cnt.hoy ? ` · ${cnt.hoy} hoy` : ''}${cnt.pas ? ` · ${cnt.pas} pasada${cnt.pas === 1 ? '' : 's'}` : ''}</div>`;
+    let html = aviso + resumen;
+    keys.forEach((k, i) => {
+      if (osBuscada && i === 1) html += `<div class="sect">Otros servicios de la cuenta</div>`;
+      html += resHTML(k, grupos[k], k === osBuscada);
+    });
+    if (osBuscada && keys.length === 1 && grupos[osBuscada].base) html += `<div class="note info">La cuenta no tiene otros servicios en la base.</div>`;
+    out.innerHTML = html;
   } catch (e) { out.innerHTML = `<div class="note err">${esc(e.message)}</div>`; }
 }
-function resHTML(os, g, abierto) {
-  const b = g.base || (g.caps[0] || {}), n = g.caps.length;
-  const fila = (k, v) => v ? `<dt>${k}</dt><dd>${v}</dd>` : '';
-  const lat = g.base && g.base.lat, lng = g.base && g.base.lng;
-  return `<details class="res"${abierto ? ' open' : ''}><summary><div><b>${esc(os)}</b><small>${esc([b.tipo, b.subtipo].filter(Boolean).join(' / ') || 'Sin datos en base')}</small></div><span class="cnt${n ? '' : ' zero'}">${n} captura${n === 1 ? '' : 's'}</span></summary><div class="in">
-    <dl class="kv">${fila('Cuenta', esc(b.cuenta))}${fila('Técnico', esc(b.tecnico))}${fila('Asignación', esc(b.fechaAsignacion))}${fila('Geocerca', esc(b.geocerca))}${fila('Cluster', esc(b.cluster))}
-    ${fila('Lat, Long', g.base && g.base.coords ? `<a href="https://maps.google.com/?q=${lat},${lng}" target="_blank" rel="noopener">${esc(g.base.coords)}</a>` : esc(b.coordsOS))}</dl>
-    ${g.caps.map(capHTML).join('') || '<div class="note info">Aún no hay capturas para esta OS.</div>'}</div></details>`;
+function resHTML(os, g, principal) {
+  const b = g.base || {}, n = g.caps.length, w = cuandoDe(b.fechaAsignacion), u = g.caps[0];
+  const linea = [b.fechaAsignacion, b.estatus, b.tecnico].filter(Boolean).map(esc).join(' · ');
+  return `<div class="card res${principal ? ' main' : ''}"><div class="rh">
+    <b>${esc(os)}</b>${g.base ? `<em class="when ${w.k}">${w.txt}</em>` : ''}
+    <small>${esc([b.tipo, b.subtipo].filter(Boolean).join(' / ')) || (g.base ? '' : '⚠️ No está en la base de la bitácora')}</small>
+    ${linea ? `<small>${linea}</small>` : ''}${b.titular ? `<small>Titular: ${esc(b.titular)}</small>` : ''}
+    ${u ? `<small>Última captura: <b style="font-size:12.5px">${esc(u.flujo)}</b> · ${esc(u.registro)}</small>` : ''}</div>
+    <div class="row"><button class="btn${principal ? '' : ' sec'}" data-eval="${esc(os)}">▶ Evaluar esta OS</button></div>
+    ${n ? `<details class="evs"><summary>Ver evidencias guardadas (${n})</summary><div class="in">${g.caps.map(capHTML).join('')}</div></details>` : ''}
+  </div>`;
 }
+document.addEventListener('click', e => { const b = e.target.closest('[data-eval]'); if (b) evaluar(b.dataset.eval); });
+
+/* ======================== EVALUACIÓN DE LA OS ======================== */
+const CAMPOS_OS = [
+  { k: 'tipo', l: 'Tipo de orden', req: true, lista: 'tiposOS' }, { k: 'cuenta', l: 'Cuenta', req: true, im: 'numeric' },
+  { k: 'titular', l: 'Nombre del titular' }, { k: 'supervisor', l: 'Nombre del Supervisor' },
+  { k: 'tecnico', l: 'Nombre del Técnico' }, { k: 'telTecnico', l: 'Teléfono del Técnico', im: 'tel', editable: true },
+  { k: 'distrito', l: 'Distrito' }
+];
+const MOTIVOS_NC = ['Titular es ilocalizable', 'No contesta', 'Número equivocado / no existe', 'Buzón de voz', 'Teléfono fuera de servicio', 'Domicilio no localizado', 'Nadie en el domicilio', 'Otro'];
+function flujoDe(b) {
+  const t = normB([b.tipo, b.subtipo].join(' '));
+  if (/empresarial|cfo/.test(t)) return 'empresarial';
+  if (/cambio de domicilio|cambio domicilio|cambio de dom/.test(t)) return 'cambioDom';
+  if (/recolec|retiro de equipo/.test(t)) return 'recoleccion';
+  if (/extender|repetidor|mesh/.test(t)) return 'extender';
+  if (/addon|add on|adicional/.test(t)) return 'addon';
+  if (/instal/.test(t)) return 'instalacion';
+  if (/soporte|falla|mantenimiento|reparac/.test(t)) return 'soporte';
+  return '';
+}
+function evaluar(os) {
+  const d = String(os).replace(/\D/g, ''), base = ordenesVistas['OS-' + d] || null;
+  S = { flujo: 'evaluacion', folio: genFolio(), osDig: d, base, osEstado: base ? 'ok' : 'noexiste', manual: {}, desdeEval: true, cuentaManual: '',
+    contacto: { localizado: '', tel: '', motivo: '', motivoOtro: '', marcados: (base && base.telCliente) || '' },
+    campos: {}, fachada: null, equipos: [], series: [], fibra: { tipo: '', metros: '', qr: '', qrImg: '' }, cierre: null, cierreNom: '', cierrePuerto: '', comentarios: '' };
+  go('eval'); getPos(0);
+}
+function renderEval() {
+  const b = S.base || {}, m = datosOS(), ct = S.contacto;
+  $('#formBody').innerHTML = '';   // evita ids repetidos entre evaluación y formulario
+  const campo = c => {
+    const v = m[c.k] || '', bloqueado = !!b[c.k] && !c.editable;
+    return `<label for="m_${c.k}">${esc(c.l)}${bloqueado ? ' 🔒' : (c.req ? ' <span class="rq">*</span>' : '')}</label>
+      <input id="m_${c.k}" data-m="${c.k}" value="${esc(v)}"${bloqueado ? ' readonly class="ro"' : ''}${c.im ? ` inputmode="${c.im}"` : ''}${c.lista ? ` list="${c.lista}"` : ''} autocomplete="off"${c.k === 'telTecnico' && b.telTecnicoFuente ? ' placeholder="Del directorio"' : ''}>`;
+  };
+  const extra = [b.subtipo && `Subtipo: ${b.subtipo}`, b.fechaAsignacion && `Agenda: ${b.fechaAsignacion}`, b.estatus && `Estatus: ${b.estatus}`, b.geocerca && `Geocerca: ${b.geocerca}`].filter(Boolean).map(esc).join(' · ');
+  $('#evalBody').innerHTML = `
+    <div class="card" id="secOS"><h3>🧾 Datos de la orden ${S.base ? '<em class="tag lock">Desde bitácora</em>' : ''}</h3>
+      <div class="osfix">OS-${esc(S.osDig)}</div>
+      ${S.base ? (extra ? `<p class="hint" style="margin:4px 0 0">${extra}</p>` : '') : `<div class="note warn">Esta OS no está en la base de la bitácora: captura los datos manualmente.</div>`}
+      ${CAMPOS_OS.map(campo).join('')}
+      <datalist id="tiposOS"><option>Instalación</option><option>Soporte</option><option>Empresarial</option><option>Addon</option><option>Extender</option><option>Cambio de Domicilio</option><option>Recolección</option></datalist>
+    </div>
+    <div class="card"><h3>💬 Mensaje de la orden</h3>
+      <pre class="wa" id="evalTxt"></pre>
+      <div class="row"><button class="btn wa" data-act="waEval">Enviar por WhatsApp</button><button class="btn sec shrink" data-act="cpEval">📋</button></div>
+    </div>
+    <div class="card" id="secLoc"><h3>📞 ¿Se localizó al cliente?</h3>
+      <div class="big2"><button class="btn sec si${ct.localizado === 'Sí' ? ' on' : ''}" data-act="loc" data-v="Sí">✅ Sí, se localizó</button><button class="btn sec no${ct.localizado === 'No' ? ' on' : ''}" data-act="loc" data-v="No">❌ No se localizó</button></div>
+      <div id="locBox"></div>
+    </div>`;
+  renderLoc(); pintarEval();
+}
+function renderLoc() {
+  const ct = S.contacto, el = $('#locBox'); if (!el) return;
+  if (ct.localizado === 'Sí') {
+    const k = flujoDe(datosOS());
+    const otros = Object.keys(FLUJOS).filter(x => x !== k);
+    el.innerHTML = `<label for="telLoc">Teléfono donde se localizó</label>
+      <input id="telLoc" inputmode="tel" value="${esc(ct.tel)}" placeholder="10 dígitos (opcional)" autocomplete="off">
+      ${k ? `<button class="btn block big" style="margin-top:14px" data-flujo="${k}">Continuar: ${FLUJOS[k].icon} ${esc(FLUJOS[k].titulo)} ›</button>`
+          : `<div class="note warn">No se reconoce el tipo de orden “${esc(datosOS().tipo || 'sin tipo')}”. Elige el formulario:</div>`}
+      <p class="hint" style="margin:12px 0 0">${k ? 'U otro formulario según el resultado de la visita:' : ''}</p>
+      <div class="fgrid">${otros.map(x => `<button class="btn sec" data-flujo="${x}">${FLUJOS[x].icon} ${esc(FLUJOS[x].titulo.replace('POST-VENTA · ', ''))}</button>`).join('')}</div>`;
+  } else if (ct.localizado === 'No') {
+    el.innerHTML = `<label for="motivoNC">Motivo de no contacto <span class="rq">*</span></label>
+      <select id="motivoNC"><option value="">Selecciona…</option>${MOTIVOS_NC.map(o => `<option${ct.motivo === o ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>
+      <div id="motivoOtroBox"${ct.motivo === 'Otro' ? '' : ' hidden'}><label for="motivoOtro">Especifica el motivo <span class="rq">*</span></label><input id="motivoOtro" value="${esc(ct.motivoOtro)}"></div>
+      <label for="telMarc">Teléfonos marcados</label><input id="telMarc" inputmode="tel" value="${esc(ct.marcados)}" placeholder="Ej. 5511112222 / 5533334444">
+      <label>Foto de fachada <em class="tag opt">Opcional</em></label>
+      <p class="hint" style="margin-top:0">Evidencia de la visita; fecha, hora y ubicación se leen de los metadatos.</p>
+      <div id="fachadaErr"></div><div id="fachadaBox"></div>
+      <div class="row"><button class="btn sec" data-act="cam" data-kind="fachada">📷 Tomar foto</button><button class="btn sec" data-act="gal" data-kind="fachada">🖼️ Galería</button></div>
+      <label for="comentIloc">Comentarios</label><textarea id="comentIloc" placeholder="Observaciones">${esc(S.comentarios)}</textarea>
+      <h3 style="margin-top:14px">📵 Mensaje de cliente ilocalizable</h3>
+      <pre class="wa" id="ilocTxt"></pre>
+      <button class="btn wa block big" style="margin-top:12px" data-act="guardarIloc">💾 Guardar cliente ilocalizable</button>`;
+    renderFotos('fachada');
+  } else el.innerHTML = '';
+}
+function motivoTxt() { const c = S.contacto; return c.motivo === 'Otro' ? (c.motivoOtro || '').trim() : c.motivo; }
+function textoEval() { return scriptBase(datosOS()).join('\n'); }
+function textoIloc() {
+  const m = datosOS(), c = S.contacto, L = ['📵 *CLIENTE ILOCALIZABLE*', ...scriptBase(m), '*MOTIVO DE NO CONTACTO*:', ` ${motivoTxt() || 'Sin dato'}`];
+  if (c.marcados.trim()) L.push('*Teléfonos marcados*:', c.marcados.trim());
+  L.push('*Fecha y hora del intento*:', fmtF(new Date()));
+  if (m.coords) L.push(`*Coordenadas OS*: ${m.coords}`);
+  if (S.fachada) { const d = distOS(S.fachada); L.push(`📷 *Fachada:* ${S.fachada.fechaTxt} · ${S.fachada.coords || 'sin ubicación'}${d != null ? ` · _a ${d} m de la OS_` : ''}`); }
+  if (S.comentarios.trim()) L.push(`*Comentarios:* ${S.comentarios.trim()}`);
+  const al = todasAlertas(); if (al.length) { L.push('⚠️ *Alertas:*'); al.forEach(a => L.push('   • ' + a)); }
+  L.push('', `*Folio:* ${S.folio}`); if (cfg.nombre) L.push(`*Capturó:* ${cfg.nombre}`);
+  return L.join('\n');
+}
+function pintarEval() { const a = $('#evalTxt'); if (a) a.textContent = textoEval(); const b = $('#ilocTxt'); if (b) b.textContent = textoIloc(); }
+function guardarTelDir() {
+  const m = datosOS(), t = String((S.manual || {}).telTecnico || '').replace(/\D/g, '');
+  if (!demo() && m.tecnico && t.length >= 10 && t !== String((S.base || {}).telTecnico || '').replace(/\D/g, ''))
+    api('telTecnico', {}, { tecnico: m.tecnico, telefono: t }).catch(() => {});
+}
+function faltanEval() {
+  const m = datosOS(), f = [];
+  if (!m.cuenta) f.push(['m_cuenta', 'Cuenta']);
+  if (!m.tipo) f.push(['m_tipo', 'Tipo de orden']);
+  const t = String(m.telTecnico || '').replace(/\D/g, ''); if (t && t.length !== 10) f.push(['m_telTecnico', 'Teléfono del técnico (10 dígitos)']);
+  return f;
+}
+function marcarFaltas(f) { f.forEach(([id]) => { const e = $('#' + id); if (e) e.classList.add('err'); }); if (f.length) { const e = $('#' + f[0][0]); if (e) e.scrollIntoView({ behavior: 'smooth', block: 'center' }); toast('Falta: ' + f.map(x => x[1]).join(' · '), 4000); } }
+function continuar(k) {
+  const f = faltanEval(); if (f.length) return marcarFaltas(f);
+  guardarTelDir();
+  S.contacto.localizado = 'Sí'; S.flujo = k; S.campos = {};
+  $('#evalBody').innerHTML = '';   // evita ids repetidos entre evaluación y formulario
+  renderForm(); go('form');
+}
+async function guardarIloc() {
+  const f = faltanEval(); if (!motivoTxt()) f.push([S.contacto.motivo === 'Otro' ? 'motivoOtro' : 'motivoNC', 'Motivo de no contacto']);
+  if (f.length) return marcarFaltas(f);
+  guardarTelDir();
+  const m = datosOS(), texto = textoIloc();
+  const data = { folio: S.folio, flujo: 'ilocalizable', flujoTitulo: 'CLIENTE ILOCALIZABLE', os: m.os, cuenta: m.cuenta, base: m,
+    contacto: { localizado: 'No', motivo: motivoTxt(), marcados: S.contacto.marcados.trim() },
+    campos: [{ id: 'motivo', label: 'Motivo de no contacto', valor: motivoTxt() }].concat(S.contacto.marcados.trim() ? [{ id: 'marcados', label: 'Teléfonos marcados', valor: S.contacto.marcados.trim() }] : []),
+    fachada: S.fachada ? metaFoto(S.fachada) : null, equipos: [], series: [], cierre: null, fibra: null,
+    comentarios: S.comentarios.trim(), alertas: todasAlertas(), capturista: cfg.nombre, dispositivo: navigator.userAgent.slice(0, 180), texto };
+  await persistir(data, texto, [S.fachada].filter(Boolean));
+}
+document.addEventListener('input', e => {
+  if (!S || cur !== 'eval') return;
+  const t = e.target, c = S.contacto;
+  if (t.dataset.m) { S.manual[t.dataset.m] = t.dataset.m === 'cuenta' || t.dataset.m === 'telTecnico' ? t.value.replace(/[^\d]/g, '') : t.value; if (t.value !== S.manual[t.dataset.m]) t.value = S.manual[t.dataset.m]; t.classList.remove('err'); }
+  else if (t.id === 'telLoc') c.tel = t.value.trim();
+  else if (t.id === 'motivoNC') { c.motivo = t.value; $('#motivoOtroBox').hidden = t.value !== 'Otro'; t.classList.remove('err'); }
+  else if (t.id === 'motivoOtro') { c.motivoOtro = t.value; t.classList.remove('err'); }
+  else if (t.id === 'telMarc') c.marcados = t.value;
+  else if (t.id === 'comentIloc') S.comentarios = t.value;
+  pintarEval();
+});
+document.addEventListener('change', e => { if (S && cur === 'eval' && e.target.id === 'motivoNC') { S.contacto.motivo = e.target.value; $('#motivoOtroBox').hidden = e.target.value !== 'Otro'; pintarEval(); } });
+
 let capTextos = [];
 const lineas = v => String(v || '').split('\n').map(x => x.trim()).filter(Boolean);
 function mapaLink(txt) {
@@ -1007,7 +1208,7 @@ async function obtenerFoto(id) {
   if (fotoCache.has(id)) return fotoCache.get(id);
   const r = await api('foto', { id }); fotoCache.set(id, r.data); return r.data;
 }
-document.addEventListener('toggle', e => { if (e.target.matches && e.target.matches('details.res') && e.target.open) cargarFotos(e.target); }, true);
+document.addEventListener('toggle', e => { if (e.target.matches && e.target.matches('details.evs') && e.target.open) cargarFotos(e.target); }, true);
 document.addEventListener('click', e => {
   const ph = e.target.closest('[data-lb]'); if (!ph || e.target.closest('a')) return;
   const fig = ph.closest('.ev'); if (!fig.classList.contains('lista')) return;
@@ -1048,7 +1249,20 @@ const CLUSTER_TO_GEOCERCA = {
   "ZUMPANGO":"ZUMPANGO G","ZUMPANGO_2_A":"ZUMPANGO G","ZUMPANGO_3_A":"ZUMPANGO G","ZUMPANGO_A":"ZUMPANGO G"
 };
 const BIT_MAP = { 'cuenta': 'cuenta', 'os': 'os', 'nombre tecnico': 'tecnico', 'tipo': 'tipo', 'subtipo': 'subtipo', 'cluster': 'cluster',
-  'latitud': 'lat', 'longitud': 'lon', 'fecha ultima agenda': 'fecha', 'estatus': 'estatus' };
+  'latitud': 'lat', 'longitud': 'lon', 'fecha ultima agenda': 'fecha', 'estatus': 'estatus',
+  'nombre cliente': 'titular', 'distrito': 'distrito', 'nombre supervisor': 'supervisor', 'turno ultima agenda': 'turno' };
+const SUPERVISOR_POR_GEOCERCA = {
+  'TEPEJI G': 'Luis Anselmo, Luis Meneses', 'HUEHUETOCA G': 'Luis Anselmo, Luis Meneses',
+  'ZUMPANGO G': 'Ricardo Peralta', 'JALTENCO G': 'Ricardo Peralta', 'TEQUIXQUIAC': 'Ricardo Peralta',
+  'LOS REYES ACOZAC G': 'Luis Bazan, Rogelio Gomez', 'TIZAYUCA G': 'Luis Bazan, Rogelio Gomez'
+};
+/* Columnas de teléfono: se detectan por nombre */
+function colTelefono(h) {
+  if (!/(^|\s)(tel|telefono|telefonos|celular|cel|movil|whatsapp)(\s|$|\d)/.test(h)) return '';
+  if (/tecnico|instalador/.test(h)) return 'telTecnico';
+  if (/supervisor|auxiliar|despacho|vendedor|asesor/.test(h)) return '';
+  return 'telCliente';
+}
 const normB = s => String(s == null ? '' : s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/\s+/g, ' ');
 function fechaBit(v) {
   if (v === '' || v == null) return '';
@@ -1070,28 +1284,35 @@ $('#inBit').onchange = async e => {
     let hi = -1, cm = {};
     for (let i = 0; i < Math.min(8, grid.length); i++) {
       const n = grid[i].map(normB);
-      if (n.includes('cuenta') && n.includes('os')) { hi = i; n.forEach((h, j) => { if (BIT_MAP[h]) cm[j] = BIT_MAP[h]; }); break; }
+      if (n.includes('cuenta') && n.includes('os')) { hi = i; n.forEach((h, j) => { const k = BIT_MAP[h] || colTelefono(h); if (k) cm[j] = k; }); break; }
     }
     if (hi < 0) throw new Error('No se encontró el encabezado con las columnas "Cuenta" y "OS".');
     const rows = [];
     for (let i = hi + 1; i < grid.length; i++) {
       const raw = grid[i]; if (!raw || !raw.length) continue;
-      const r = {}; Object.entries(cm).forEach(([j, k]) => r[k] = raw[j]);
+      const r = {}, tels = [];
+      Object.entries(cm).forEach(([j, k]) => { if (k === 'telCliente') { const t = String(raw[j] == null ? '' : raw[j]).trim(); if (t && !tels.includes(t)) tels.push(t); } else r[k] = raw[j]; });
       if (!String(r.os || '').replace(/\D/g, '')) continue;
       r.cuenta = String(r.cuenta == null ? '' : r.cuenta).trim();
-      ['tecnico', 'tipo', 'subtipo', 'cluster', 'estatus'].forEach(k => r[k] = String(r[k] == null ? '' : r[k]).trim());
+      ['tecnico', 'tipo', 'subtipo', 'cluster', 'estatus', 'titular', 'distrito', 'supervisor', 'turno', 'telTecnico'].forEach(k => r[k] = String(r[k] == null ? '' : r[k]).trim());
+      r.telCliente = tels.join(' / ');
       r.fecha = fechaBit(r.fecha);
       r.geocerca = CLUSTER_TO_GEOCERCA[r.cluster.toUpperCase()] || (r.cluster ? 'TULA' : 'Sin cluster');
+      if (!r.supervisor) r.supervisor = SUPERVISOR_POR_GEOCERCA[r.geocerca] || '';
       r.lat = r.lat === '' ? '' : String(r.lat); r.lon = r.lon === '' ? '' : String(r.lon);
       rows.push(r);
     }
     if (!rows.length) throw new Error('El archivo no tiene OS.');
     bitRows = rows;
-    const falt = ['tecnico', 'fecha', 'lat', 'lon', 'cluster'].filter(k => !Object.values(cm).includes(k));
+    const NOMBRES = { tecnico: 'Nombre Técnico', fecha: 'Fecha Última Agenda', lat: 'Latitud', lon: 'Longitud', cluster: 'Cluster', titular: 'Nombre Cliente (titular)', supervisor: 'Nombre Supervisor (se usará el de la geocerca)', distrito: 'Distrito' };
+    const falt = Object.keys(NOMBRES).filter(k => !Object.values(cm).includes(k)).map(k => NOMBRES[k]);
+    const tieneTelTec = Object.values(cm).includes('telTecnico'), tieneTelCli = Object.values(cm).includes('telCliente');
     const ej = rows[0];
     $('#bitRes').innerHTML = `<div class="note ok">${rows.length} OS leídas de “${esc(f.name)}”.</div>
       ${falt.length ? `<div class="note warn">No se encontraron las columnas: ${falt.join(', ')}</div>` : ''}
-      <dl class="kv"><dt>Ejemplo</dt><dd>OS-${esc(String(ej.os).replace(/\D/g, ''))} · ${esc(ej.cuenta)}</dd><dt>Técnico</dt><dd>${esc(ej.tecnico)}</dd>
+      ${tieneTelTec ? '' : '<div class="note info">La bitácora no trae teléfono del técnico: se toma del directorio (se guarda la primera vez que alguien lo captura en la evaluación).</div>'}
+      ${tieneTelCli ? '<div class="note ok">Se detectaron columnas de teléfono del cliente.</div>' : ''}
+      <dl class="kv"><dt>Ejemplo</dt><dd>OS-${esc(String(ej.os).replace(/\D/g, ''))} · ${esc(ej.cuenta)}</dd><dt>Titular</dt><dd>${esc(ej.titular)}</dd><dt>Técnico</dt><dd>${esc(ej.tecnico)}</dd><dt>Supervisor</dt><dd>${esc(ej.supervisor)}</dd><dt>Distrito</dt><dd>${esc(ej.distrito)}</dd>
       <dt>Asignación</dt><dd>${esc(ej.fecha)}</dd><dt>Geocerca</dt><dd>${esc(ej.geocerca)} · ${esc(ej.cluster)}</dd></dl>
       <button class="btn block big" style="margin-top:12px" id="btnBitUp">⬆️ Subir ${rows.length} OS a la base</button>`;
     $('#btnBitUp').onclick = subirBitacora;
@@ -1099,14 +1320,16 @@ $('#inBit').onchange = async e => {
   busy(null);
 };
 async function subirBitacora() {
-  const T = 800; let nuevos = 0, act = 0, total = 0;
+  cfg.admin = $('#cfgAdmin').value.trim(); LSset('d29_cfg', cfg);
+  if (!demo() && !cfg.admin) { toast('Escribe la clave de administrador'); $('#cfgAdmin').focus(); return; }
+  const T = 800; let nuevos = 0, act = 0, comp = 0, total = 0;
   try {
     for (let i = 0; i < bitRows.length; i += T) {
       busy(`Subiendo ${Math.min(i + T, bitRows.length)} de ${bitRows.length}…`);
-      const r = await api('cargarBase', {}, { rows: bitRows.slice(i, i + T) });
-      nuevos += r.nuevos; act += (r.existentes != null ? r.existentes : r.actualizados || 0); total = r.total;
+      const r = await api('cargarBase', {}, { admin: cfg.admin, rows: bitRows.slice(i, i + T) });
+      nuevos += r.nuevos; act += (r.existentes != null ? r.existentes : r.actualizados || 0); comp += r.completadas || 0; total = r.total;
     }
-    $('#bitRes').innerHTML = `<div class="note ok">✅ Base actualizada: ${nuevos} OS nuevas agregadas, ${act} ya existían (sin cambios). Total en base: ${total}.</div>`;
+    $('#bitRes').innerHTML = `<div class="note ok">✅ Base actualizada: ${nuevos} OS nuevas agregadas. ${act} ya existían${comp ? ` (a ${comp} se les completaron datos que estaban vacíos)` : ' (sin cambios)'}. Total en base: ${total}.</div>`;
     bitRows = null;
   } catch (e) { $('#bitRes').insertAdjacentHTML('beforeend', `<div class="note err">${esc(e.message)}</div>`); }
   busy(null);
@@ -1114,7 +1337,7 @@ async function subirBitacora() {
 
 /* ======================== AJUSTES ======================== */
 function fillCfg() { $('#cfgNombre').value = cfg.nombre; $('#cfgWa').value = cfg.waNum; $('#cfgUrl').value = cfg.apiUrl; $('#cfgToken').value = cfg.token; $('#cfgMsg').innerHTML = ''; }
-function leerCfg() { cfg = { nombre: $('#cfgNombre').value.trim(), waNum: $('#cfgWa').value.trim(), apiUrl: $('#cfgUrl').value.trim(), token: $('#cfgToken').value.trim() }; LSset('d29_cfg', cfg); }
+function leerCfg() { cfg = { admin: cfg.admin, nombre: $('#cfgNombre').value.trim(), waNum: $('#cfgWa').value.trim(), apiUrl: $('#cfgUrl').value.trim(), token: $('#cfgToken').value.trim() }; LSset('d29_cfg', cfg); }
 function urlValida(u) { return !u || /^https:\/\/script\.google\.com\/(a\/macros\/[^/]+|macros)\/s\/[\w-]{20,}\/exec\/?$/.test(u); }
 const CHECK_URL = `<div class="note warn" style="text-align:left">Revisa en Apps Script:<br>
   1. Ejecutaste la función <b>setup</b> y aceptaste los permisos (deben aparecer las pestañas Base_OS y Evidencias en la hoja).<br>
