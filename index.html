@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#4a1f70">
+<meta name="theme-color" content="#2b2d33">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Evidencias D29 Huehuetoca</title>
@@ -13,8 +13,10 @@
 <style>
 :root{
   /* Colores del tema: ajústalos al manual de marca si lo necesitas */
-  --tp:#5b2a86; --tp-d:#3d1660; --tp2:#e6007e; --tp-l:#f0e9f7;
-  --bg:#f5f2f9; --card:#fff; --ink:#1d1630; --mute:#6b6280; --line:#e4ddee;
+  /* Colores Totalplay (tomados del logo: rojo, amarillo, verde, cian, morado + gris del logotipo) */
+  --c-r:#db1e35; --c-y:#f5b43c; --c-g:#bfcd30; --c-c:#37b5df; --c-p:#9769a4;
+  --tp:#0878b0; --tp-d:#2b2d33; --tp2:#db1e35; --tp-l:#e3f3fb;
+  --bg:#f3f5f8; --card:#fff; --ink:#1f2328; --mute:#5f6670; --line:#dde3ea;
   --ok:#0f7b55; --warn:#a85b00; --err:#c0262d; --wa:#1fa855; --r:14px;
 }
 *{box-sizing:border-box}
@@ -24,7 +26,8 @@ a{color:var(--tp)}
 [hidden]{display:none!important}
 
 /* Encabezado */
-.top{position:sticky;top:0;z-index:30;background:linear-gradient(115deg,var(--tp-d),var(--tp) 55%,var(--tp2));color:#fff;padding:calc(10px + env(safe-area-inset-top)) 12px 10px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 12px rgba(40,0,60,.25)}
+.top{position:sticky;top:0;z-index:30;background:var(--tp-d);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 12px 10px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+.top::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:4px;background:linear-gradient(90deg,var(--c-r) 0 20%,var(--c-y) 20% 40%,var(--c-g) 40% 60%,var(--c-c) 60% 80%,var(--c-p) 80% 100%)}
 .top .back{background:rgba(255,255,255,.18);border:0;color:#fff;width:38px;height:38px;border-radius:10px;font-size:20px;flex:0 0 auto}
 .brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
 .brand img{height:34px;width:auto;flex:0 0 auto}
@@ -54,16 +57,16 @@ main{max-width:640px;margin:0 auto;padding:14px}
 /* Tarjetas y formularios */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:0 0 12px}
 .card h3{margin:0 0 6px;font-size:15.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.tag{font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:3px 7px;border-radius:999px;background:#fde7f2;color:var(--tp2)}
+.tag{font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:3px 7px;border-radius:999px;background:#fde8eb;color:var(--tp2)}
 .tag.opt{background:#eee;color:#666}
 .tag.lock{background:#e6f4ee;color:var(--ok)}
 .hint{font-size:13px;color:var(--mute);margin:0 0 10px}
-label{display:block;font-size:13px;font-weight:700;margin:12px 0 5px;color:#4b4260}
+label{display:block;font-size:13px;font-weight:700;margin:12px 0 5px;color:#3e444c}
 label .rq{color:var(--tp2)}
 input,select,textarea{width:100%;font:inherit;font-size:16px;padding:12px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);-webkit-appearance:none;appearance:none}
 select{background-image:linear-gradient(45deg,transparent 50%,var(--tp) 50%),linear-gradient(135deg,var(--tp) 50%,transparent 50%);background-position:calc(100% - 18px) 52%,calc(100% - 12px) 52%;background-size:6px 6px;background-repeat:no-repeat;padding-right:32px}
 textarea{min-height:84px;resize:vertical}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--tp);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--tp);box-shadow:0 0 0 3px rgba(8,120,176,.15)}
 .err{border-color:var(--err)!important;box-shadow:0 0 0 3px rgba(192,38,45,.1)!important}
 .errmsg{color:var(--err);font-size:13px;font-weight:600;margin-top:6px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:11px;padding:12px 14px;font:inherit;font-weight:800;font-size:15px;background:var(--tp);color:#fff;min-height:48px;text-decoration:none;cursor:pointer}
@@ -80,7 +83,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--tp);box-
 .row>.shrink{flex:0 0 auto}
 
 .osbox{display:flex;border:1.5px solid var(--line);border-radius:11px;overflow:hidden;background:#fff}
-.osbox:focus-within{border-color:var(--tp);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+.osbox:focus-within{border-color:var(--tp);box-shadow:0 0 0 3px rgba(8,120,176,.15)}
 .osbox span{background:var(--tp);color:#fff;font-weight:900;padding:0 12px;display:flex;align-items:center;font-size:18px;letter-spacing:1px}
 .osbox input{border:0;border-radius:0;box-shadow:none!important;font-size:22px;font-weight:800;letter-spacing:3px;padding:12px 10px}
 .osbox.err{border-color:var(--err)}
@@ -96,7 +99,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--tp);box-
 .note.err{background:#fdecec;color:var(--err)}
 .note.info{background:var(--tp-l);color:var(--tp-d)}
 
-.photo{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:10px;background:#faf8fc}
+.photo{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:10px;background:#f8fafc}
 .photo img{width:100%;display:block;background:#222}
 .photo .body{padding:10px}
 .photo .kv{font-size:12.5px;margin:0}
@@ -111,7 +114,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--tp);box-
 .seg{display:flex;background:var(--tp-l);border-radius:11px;padding:4px;gap:4px}
 .seg button{flex:1;border:0;background:transparent;padding:11px 6px;font:inherit;font-weight:800;font-size:14px;border-radius:8px;color:var(--tp)}
 .seg button.on{background:var(--tp);color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-.qrval{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;background:#f3f0f7;border-radius:8px;padding:10px;word-break:break-all;margin-top:10px}
+.qrval{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;background:#eef2f6;border-radius:8px;padding:10px;word-break:break-all;margin-top:10px}
 
 pre.wa{white-space:pre-wrap;word-break:break-word;background:#e8f8ee;border:1px solid #c9ecd6;border-radius:12px;padding:12px;font:14px/1.45 system-ui,-apple-system,sans-serif;max-height:55vh;overflow:auto;margin:0}
 
@@ -130,10 +133,10 @@ pre.wa{white-space:pre-wrap;word-break:break-word;background:#e8f8ee;border:1px 
 .thumbs{display:flex;gap:6px;overflow-x:auto;margin-top:8px}
 .thumbs a{flex:0 0 auto}
 .thumbs img{height:84px;width:auto;border-radius:8px;border:1px solid var(--line);background:#eee;display:block}
-.cap pre{white-space:pre-wrap;font:12.5px/1.4 system-ui,sans-serif;margin:6px 0 0;color:#3b3350}
+.cap pre{white-space:pre-wrap;font:12.5px/1.4 system-ui,sans-serif;margin:6px 0 0;color:#33383f}
 
 /* Modal escáner / overlay */
-.modal{position:fixed;inset:0;background:rgba(15,5,25,.92);z-index:60;display:flex;flex-direction:column;padding:calc(14px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));color:#fff}
+.modal{position:fixed;inset:0;background:rgba(10,12,16,.92);z-index:60;display:flex;flex-direction:column;padding:calc(14px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));color:#fff}
 .modal h4{margin:4px 0 10px;font-size:16px}
 #reader{width:100%;max-width:520px;margin:0 auto;border-radius:12px;overflow:hidden;background:#000}
 #reader video{border-radius:12px}
@@ -142,33 +145,37 @@ pre.wa{white-space:pre-wrap;word-break:break-word;background:#e8f8ee;border:1px 
 .busy{position:fixed;inset:0;background:rgba(255,255,255,.75);backdrop-filter:blur(2px);z-index:70;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-weight:800;color:var(--tp)}
 .spin{width:42px;height:42px;border:4px solid var(--tp-l);border-top-color:var(--tp);border-radius:50%;animation:sp 0.8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
-#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#221a33;color:#fff;padding:12px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:80;max-width:92vw;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#1f2328;color:#fff;padding:12px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:80;max-width:92vw;box-shadow:0 6px 20px rgba(0,0,0,.25)}
 .evgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.ev{margin:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#faf8fc}
+.ev{margin:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#f8fafc}
 .ev.wide{grid-column:1/-1}
-.ev .ph{aspect-ratio:4/3;background:#ece6f3;display:flex;align-items:center;justify-content:center;color:var(--mute);font-size:12px;font-weight:700;position:relative;cursor:zoom-in}
+.ev .ph{aspect-ratio:4/3;background:#e9eef3;display:flex;align-items:center;justify-content:center;color:var(--mute);font-size:12px;font-weight:700;position:relative;cursor:zoom-in}
 .ev .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:none}
-.ev.lista .ph{background:#1b1226}
+.ev.lista .ph{background:#111418}
 .ev.lista .ph img{display:block}
 .ev.lista .ph span{display:none}
-.ev figcaption{padding:6px 8px;font-size:11.5px;line-height:1.4;color:#3b3350;word-break:break-word}
+.ev figcaption{padding:6px 8px;font-size:11.5px;line-height:1.4;color:#33383f;word-break:break-word}
 .ev figcaption b{display:block;font-size:12.5px;color:var(--tp)}
 .evdata{display:grid;grid-template-columns:max-content 1fr;gap:5px 10px;font-size:13px;margin:10px 0 0}
 .evdata dt{color:var(--mute)}
 .evdata dd{margin:0;font-weight:700;white-space:pre-wrap;word-break:break-word}
-.lb{position:fixed;inset:0;background:rgba(10,3,18,.95);z-index:75;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom));color:#fff}
+.lb{position:fixed;inset:0;background:rgba(8,10,14,.95);z-index:75;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom));color:#fff}
 .lb img{max-width:100%;max-height:72vh;border-radius:8px}
 .lb p{font-size:13px;text-align:center;margin:10px 0;max-width:560px;white-space:pre-wrap}
 .lb .row{width:100%;max-width:420px}
-.res.card{padding:12px}
+.res.card{padding:12px;cursor:pointer;position:relative;padding-right:34px}
+.res.card::after{content:"›";position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:28px;color:var(--tp);font-weight:300}
+.res.card:active{background:var(--tp-l)}
+.res.card.actual{cursor:default;border:2px solid var(--tp)}.res.card.actual::after{content:""}
+#qBox{flex:1}#qBox input{font-size:20px;letter-spacing:2px}
 .res.main{border:2px solid var(--tp)}
 .res .rh b{font-size:17px}
 .res .rh small{display:block;color:var(--mute);font-size:12.5px;margin-top:2px}
 .when{font-style:normal;font-size:10.5px;font-weight:800;padding:3px 7px;border-radius:999px;margin-left:6px;vertical-align:2px;text-transform:uppercase;letter-spacing:.4px}
-.when.fut{background:#e3f0ff;color:#1f5fae}.when.hoy{background:#fff3e0;color:var(--warn)}.when.pas{background:#eee;color:#666}.when.sin{background:#f3f0f7;color:var(--mute)}
+.when.fut{background:#e3f0ff;color:#1f5fae}.when.hoy{background:#fff3e0;color:var(--warn)}.when.pas{background:#eee;color:#666}.when.sin{background:#eef2f6;color:var(--mute)}
 .evs{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
 .evs>summary{cursor:pointer;color:var(--tp);font-weight:800;font-size:14px}
-.ro{background:#f6f3fa!important;color:#3b3350;border-style:dashed!important}
+.ro{background:#f1f4f7!important;color:#33383f;border-style:dashed!important}
 .osfix{font-size:22px;font-weight:900;letter-spacing:2px;color:var(--tp)}
 .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .fgrid .btn{font-size:13.5px;min-height:44px;padding:8px}
@@ -206,9 +213,10 @@ pre.wa{white-space:pre-wrap;word-break:break-word;background:#e8f8ee;border:1px 
       </div>
       <label id="qLabel" for="qIn">Orden de servicio</label>
       <div class="row" style="margin-top:0">
-        <input id="qIn" inputmode="numeric" placeholder="OS-12345678" autocomplete="off">
+        <div class="osbox" id="qBox"><span id="qPre">OS-</span><input id="qIn" inputmode="numeric" placeholder="12345678" autocomplete="off"></div>
         <button class="btn shrink" id="btnQ">Buscar</button>
       </div>
+      <p class="hint" id="qHint" style="margin:8px 0 0">Al buscar se abre la evaluación de la orden con el historial de la cuenta.</p>
     </div>
     <div id="qRes"></div>
     <div class="sect">Base de datos</div>
@@ -304,7 +312,7 @@ const APP = {
   HORAS_ALERTA: 12,   // alerta si la foto tiene más de estas horas
   MAX_PX: 1600, JPG_Q: 0.72,
   /* Metadatos obligatorios (EXIF) */
-  EXIF_GALERIA_OBLIGATORIO: true,  // fotos subidas de galería: se rechazan si no traen fecha Y ubicación GPS en sus metadatos
+  EXIF_GALERIA_OBLIGATORIO: false, // true = rechaza fotos de galería sin fecha y GPS en metadatos. false = se aceptan y, sin GPS, se usa la ubicación de la OS con enlace de navegación
   EXIF_CAMARA_OBLIGATORIO: false,  // fotos tomadas en la app: true = también se rechazan sin GPS en metadatos (en Android suele venir sin GPS)
   GALERIA_MAX_HORAS: 0             // 0 = sin límite; p. ej. 24 = rechaza fotos de galería con más de 24 h
 };
@@ -478,11 +486,11 @@ function renderModeNote() {
 }
 function logoHTML(h) { return APP.LOGO_URL ? `<img src="${esc(APP.LOGO_URL)}" alt="Totalplay" style="height:${h}px">` : EMBLEM(h); }
 function EMBLEM(h) {
-  return `<svg width="${h}" height="${h}" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="g${h}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3d1660"/><stop offset=".6" stop-color="#5b2a86"/><stop offset="1" stop-color="#e6007e"/></linearGradient></defs>
-  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#g${h})" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
-  <path d="M12 46c8-4 14-12 20-26M20 50c8-5 16-14 22-30" stroke="#fff" stroke-opacity=".35" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-  <text x="32" y="40" text-anchor="middle" font-family="system-ui,Arial" font-size="24" font-weight="900" fill="#fff">29</text>
-  <text x="32" y="54" text-anchor="middle" font-family="system-ui,Arial" font-size="7.5" font-weight="800" fill="#fff" letter-spacing="1">HUEHUETOCA</text></svg>`;
+  const dots = ['#db1e35', '#f5b43c', '#bfcd30', '#37b5df', '#9769a4'].map((c, i) => `<circle cx="${14 + i * 9}" cy="15" r="3.6" fill="${c}"/>`).join('');
+  return `<svg width="${h}" height="${h}" viewBox="0 0 64 64" aria-hidden="true">
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="#2b2d33" stroke="#fff" stroke-opacity=".35" stroke-width="2"/>${dots}
+  <text x="32" y="44" text-anchor="middle" font-family="system-ui,Arial" font-size="24" font-weight="900" fill="#fff">29</text>
+  <text x="32" y="56" text-anchor="middle" font-family="system-ui,Arial" font-size="6.8" font-weight="800" fill="#fff" letter-spacing=".4">HUEHUETOCA</text></svg>`;
 }
 $('#logoSlot').innerHTML = logoHTML(36);
 $('#heroLogo').innerHTML = EMBLEM(52);
@@ -614,6 +622,7 @@ document.addEventListener('click', e => {
   else if (a === 'qrManual') { const t = prompt('Escribe el código de la fibra:'); if (t && t.trim()) { S.fibra.qr = t.trim(); S.fibra.qrFuente = 'Manual'; renderFibra(); } }
   else if (a === 'buscarOS') buscarOS();
   else if (a === 'guardar') guardar();
+  else if (a === 'ubTel' || a === 'ubOS') cambiarUbicacion(b.dataset.kind, +b.dataset.i, a);
   else if (a === 'loc') { S.contacto.localizado = b.dataset.v; document.querySelectorAll('[data-act="loc"]').forEach(x => x.classList.toggle('on', x === b)); renderLoc(); pintarEval(); }
   else if (a === 'waEval') { const f = faltanEval(); if (f.length) return marcarFaltas(f); guardarTelDir(); enviarWA(textoEval()); }
   else if (a === 'cpEval') copiar(textoEval()).then(ok => toast(ok ? 'Texto copiado' : 'No se pudo copiar'));
@@ -658,6 +667,23 @@ async function procesarArchivos(files, origen) {
     errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 }
+async function cambiarUbicacion(kind, i, modo) {
+  const p = kind === 'fachada' ? S.fachada : kind === 'cierre' ? S.cierre : S.equipos[i];
+  if (!p || !p.file) return;
+  let forzar;
+  if (modo === 'ubOS') forzar = { lat: S.base.lat, lng: S.base.lng, tipo: 'os', fuente: 'Sin metadatos de ubicación · se usó la latitud/longitud de la OS (bitácora)' };
+  else {
+    busy('Obteniendo tu ubicación…'); const g = await getPos(0); busy(null);
+    if (!g) return toast('No se pudo obtener la ubicación. Activa el GPS y da permiso de ubicación.', 4500);
+    forzar = { lat: g.lat, lng: g.lng, acc: g.acc, tipo: 'tel', fuente: `Sin metadatos de ubicación · ubicación colocada con el GPS del teléfono (±${g.acc} m)` };
+  }
+  busy('Actualizando ubicación…');
+  try {
+    const n = await procesarFoto(p.file, kind, p.origen, forzar);
+    if (kind === 'fachada') S.fachada = n; else if (kind === 'cierre') S.cierre = n; else S.equipos[i] = n;
+  } catch (e) { toast('No se pudo actualizar: ' + e.message); }
+  busy(null); renderFotos(kind);
+}
 async function leerExif(file) {
   if (!window.exifr) throw new Error('No cargó el lector de metadatos. Revisa tu conexión y recarga la página.');
   let ex = {};
@@ -673,7 +699,8 @@ async function leerExif(file) {
   };
 }
 const EDITORES = /photoshop|lightroom|snapseed|picsart|gimp|canva|facetune|vsco|meitu|picsart|polarr|pixlr|photo ?editor|editor|remini|airbrush/i;
-async function procesarFoto(file, kind, origen) {
+function navUrl(lat, lng) { return `https://www.google.com/maps/dir/?api=1&destination=${(+lat).toFixed(6)},${(+lng).toFixed(6)}`; }
+async function procesarFoto(file, kind, origen, forzar) {
   const galeria = origen === 'Galería';
   const ex = await leerExif(file);
   const obligatorio = galeria ? APP.EXIF_GALERIA_OBLIGATORIO : APP.EXIF_CAMARA_OBLIGATORIO;
@@ -686,20 +713,26 @@ async function procesarFoto(file, kind, origen) {
   if (galeria && APP.GALERIA_MAX_HORAS > 0 && ex.fecha && (Date.now() - ex.fecha.getTime()) / 36e5 > APP.GALERIA_MAX_HORAS)
     throw new Error(`fue tomada el ${fmtF(ex.fecha)}; solo se aceptan fotos de las últimas ${APP.GALERIA_MAX_HORAS} h.`);
 
-  let lat = ex.lat, lng = ex.lng, acc = null, fuenteUb;
-  if (lat != null) fuenteUb = 'GPS en metadatos de la foto (EXIF)';
-  else {
+  let lat = ex.lat, lng = ex.lng, acc = null, fuenteUb, ubTipo = 'exif';
+  const bOS = S && (S.base || {}), osOk = bOS && okNum(bOS.lat) && okNum(bOS.lng);
+  if (forzar) { lat = forzar.lat; lng = forzar.lng; acc = forzar.acc || null; fuenteUb = forzar.fuente; ubTipo = forzar.tipo; }
+  else if (lat != null) fuenteUb = 'GPS en metadatos de la foto (EXIF)';
+  else if (galeria && osOk) {   // foto de galería sin metadatos: se toma la ubicación de la OS (bitácora)
+    lat = bOS.lat; lng = bOS.lng; ubTipo = 'os'; fuenteUb = 'Sin metadatos de ubicación · se usó la latitud/longitud de la OS (bitácora)';
+  } else {
     busy('Obteniendo ubicación del teléfono…');
     const p = await getPos(30000);
-    if (p) { lat = p.lat; lng = p.lng; acc = p.acc; fuenteUb = `GPS del teléfono al capturar (±${p.acc} m) · la foto no trae GPS`; }
-    else fuenteUb = 'Sin ubicación (GPS desactivado o sin permiso)';
+    if (p) { lat = p.lat; lng = p.lng; acc = p.acc; ubTipo = 'tel'; fuenteUb = `Sin metadatos de ubicación · GPS del teléfono al ${galeria ? 'subir' : 'capturar'} (±${p.acc} m)`; }
+    else { ubTipo = 'ninguna'; fuenteUb = 'Sin ubicación (la foto no trae GPS y no hay coordenadas de la OS ni GPS del teléfono)'; }
   }
   let fecha, fuenteFecha;
   if (ex.fecha) { fecha = ex.fecha; fuenteFecha = 'EXIF'; }
+  else if (galeria && file.lastModified) { fecha = new Date(file.lastModified); fuenteFecha = 'Fecha del archivo (sin metadatos)'; }
   else { fecha = new Date(); fuenteFecha = 'Reloj del teléfono'; }
 
   const alertas = [];
   if (lat == null) alertas.push('Foto sin geolocalización');
+  if (ubTipo === 'os') alertas.push('Foto sin metadatos de ubicación: se usó la ubicación de la OS');
   if (galeria && !ex.fecha) alertas.push('Foto de galería sin fecha en metadatos');
   if (ex.software && EDITORES.test(ex.software)) alertas.push(`Foto procesada con editor: ${ex.software}`);
   const horas = (Date.now() - fecha.getTime()) / 36e5;
@@ -718,9 +751,11 @@ async function procesarFoto(file, kind, origen) {
   const etiqueta = { fachada: 'FACHADA', equipo: 'EQUIPO', cierre: 'CIERRE 2N' }[kind] || 'FOTO';
   const img = await sellar(file, [
     `OS-${S.osDig || '________'} · ${etiqueta} · Totalplay D29 Huehuetoca`,
-    `${fmtF(fecha)} (${fuenteFecha}) · ${coords || 'sin ubicación'}`
+    `${fmtF(fecha)} (${fuenteFecha.replace(' (sin metadatos)', '')}) · ${coords || 'sin ubicación'}${ubTipo === 'os' ? ' (ref. OS)' : ''}`
   ]);
-  return Object.freeze({ kind, img, fecha: fecha.toISOString(), fechaTxt: fmtF(fecha), fuenteFecha, lat, lng, acc, coords, fuenteUb, origen,
+  const nav = lat != null ? navUrl(lat, lng) : '';
+  return Object.freeze({ kind, img, file, fecha: fecha.toISOString(), fechaTxt: fmtF(fecha), fuenteFecha, lat, lng, acc, coords, ubTipo, nav,
+    fuenteUb: fuenteUb + (nav && ubTipo !== 'exif' ? ` · Navegación: ${nav}` : ''), fuenteUbCorta: fuenteUb, origen,
     camara, exifTxt, exifGps: ex.lat != null, exifFecha: !!ex.fecha, alertasFijas: Object.freeze(alertas) });
 }
 async function cargarImagen(file) {
@@ -734,13 +769,13 @@ async function sellar(file, lineas) {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   const x = c.getContext('2d'); x.drawImage(im, 0, 0, w, h);
   const fs = Math.max(13, Math.round(Math.min(w, h * 1.4) / 40)), p = Math.round(fs * .6), lh = Math.round(fs * 1.35), bh = p * 2 + lh * lineas.length;
-  x.fillStyle = 'rgba(20,6,34,.68)'; x.fillRect(0, h - bh, w, bh);
-  x.fillStyle = '#e6007e'; x.fillRect(0, h - bh, Math.max(4, fs / 3), bh);
+  x.fillStyle = 'rgba(28,30,36,.72)'; x.fillRect(0, h - bh, w, bh);
+  ['#db1e35', '#f5b43c', '#bfcd30', '#37b5df', '#9769a4'].forEach((c, i, a) => { x.fillStyle = c; x.fillRect(0, h - bh + i * bh / a.length, Math.max(4, fs / 3), bh / a.length + 1); });
   x.fillStyle = '#fff'; x.textBaseline = 'top';
   lineas.forEach((t, i) => { x.font = `${i ? 500 : 800} ${fs}px system-ui, Arial, sans-serif`; x.fillText(t, p * 1.6, h - bh + p + i * lh, w - p * 3); });
   return c.toDataURL('image/jpeg', APP.JPG_Q);
 }
-function distOS(p) { const b = S && S.base; return (b && okNum(b.lat) && okNum(b.lng) && p.lat != null) ? distM(b.lat, b.lng, p.lat, p.lng) : null; }
+function distOS(p) { const b = S && S.base; return (b && okNum(b.lat) && okNum(b.lng) && p.lat != null && p.ubTipo !== 'os') ? distM(b.lat, b.lng, p.lat, p.lng) : null; }
 function alertasDe(p) { const a = [...p.alertasFijas], d = distOS(p); if (d != null && d > APP.DIST_ALERTA_M) a.push(`Foto a ${d} m de la ubicación de la OS`); return a; }
 function fotoHTML(p, i) {
   const d = distOS(p);
@@ -748,12 +783,13 @@ function fotoHTML(p, i) {
     <div class="lockbar">🔒 Metadatos bloqueados</div>
     <dl class="kv"><dt>Fecha/hora</dt><dd>${esc(p.fechaTxt)} <small>(${esc(p.fuenteFecha)})</small></dd>
     <dt>Lat, Long</dt><dd>${p.coords ? `<a href="https://maps.google.com/?q=${p.lat},${p.lng}" target="_blank" rel="noopener">${esc(p.coords)}</a>` : '—'}</dd>
-    <dt>Fuente</dt><dd>${esc(p.fuenteUb)}</dd>${d != null ? `<dt>Distancia OS</dt><dd>${d} m</dd>` : ''}
+    <dt>Fuente</dt><dd>${esc(p.fuenteUbCorta || p.fuenteUb)}</dd>${d != null ? `<dt>Distancia OS</dt><dd>${d} m</dd>` : ''}
+    ${p.nav ? `<dt>Navegación</dt><dd><a href="${esc(p.nav)}" target="_blank" rel="noopener">🧭 Abrir en Google Maps</a></dd>` : ''}
     <dt>Origen</dt><dd>${esc(p.origen)}${p.camara ? ' · ' + esc(p.camara) : ''}</dd>
     <dt>Metadatos</dt><dd>${p.exifFecha ? '✅ Fecha' : '❌ Fecha'} · ${p.exifGps ? '✅ GPS' : '❌ GPS'}</dd></dl>
     <details style="margin-top:6px;font-size:12px"><summary style="cursor:pointer;color:var(--tp);font-weight:700">Ver metadatos leídos</summary><div style="margin-top:4px;color:#3b3350">${esc(p.exifTxt).replace(/ · /g, '<br>')}</div></details>
     ${alertasDe(p).map(a => `<div class="alert">⚠️ ${esc(a)}</div>`).join('')}
-    <div class="row"><button class="btn ghost sm" data-act="delFoto" data-kind="${p.kind}" data-i="${i}">🗑️ Quitar foto</button></div></div></div>`;
+    <div class="row">${p.ubTipo !== 'exif' ? `<button class="btn sec sm" data-act="ubTel" data-kind="${p.kind}" data-i="${i}">📍 Usar mi ubicación actual</button>` : ''}${p.ubTipo === 'tel' && S.base && okNum(S.base.lat) ? `<button class="btn sec sm" data-act="ubOS" data-kind="${p.kind}" data-i="${i}">🏠 Usar ubicación de la OS</button>` : ''}<button class="btn ghost sm" data-act="delFoto" data-kind="${p.kind}" data-i="${i}">🗑️ Quitar foto</button></div></div></div>`;
 }
 function renderFotos(kind) {
   if (!S) return;
@@ -878,7 +914,7 @@ function construirTexto() {
   if (!S.base) L.push('⚠️ _OS no encontrada en la base_');
   const campos = f.campos.filter(c => S.campos[c.id]);
   if (campos.length) { L.push(''); campos.forEach(c => add(c.label, c.tipo === 'date' ? S.campos[c.id].split('-').reverse().join('/') : S.campos[c.id])); }
-  const fotoLin = p => `${p.fechaTxt} · ${p.coords || 'sin ubicación'}`;
+  const fotoLin = p => `${p.fechaTxt} · ${p.coords || 'sin ubicación'}${p.nav && p.ubTipo !== 'exif' ? `\n      📍 ${p.ubTipo === 'os' ? 'Sin metadatos, ubicación de la OS' : 'Sin metadatos'}: ${p.nav}` : ''}`;
   if (S.fachada) { L.push(''); L.push(`📷 *Fachada:* ${fotoLin(S.fachada)}`); const d = distOS(S.fachada); if (d != null) L.push(`   _a ${d} m de la OS_`); }
   if (S.equipos.length) { if (!S.fachada) L.push(''); L.push(`📡 *Fotos de equipo (${S.equipos.length}):*`); S.equipos.forEach((p, i) => L.push(`   ${i + 1}. ${fotoLin(p)}`)); }
   if (FLUJOS[S.flujo].cierre && (S.cierreNom || S.cierrePuerto || S.cierre)) {
@@ -955,8 +991,14 @@ $('#btnNew').onclick = () => { S = null; ultimo = null; history.replaceState({ v
 let qModo = 'os';
 const ordenesVistas = {};
 $('#qSeg').onclick = e => { const b = e.target.closest('button'); if (!b) return; setQModo(b.dataset.q); };
-function setQModo(m) { qModo = m; document.querySelectorAll('#qSeg button').forEach(x => x.classList.toggle('on', x.dataset.q === m)); $('#qLabel').textContent = m === 'os' ? 'Orden de servicio' : 'Número de cuenta'; $('#qIn').placeholder = m === 'os' ? 'OS-12345678' : '0101234567'; }
-$('#qIn').addEventListener('input', e => { if (/^os/i.test(e.target.value) && qModo !== 'os') setQModo('os'); });
+function setQModo(m) {
+  qModo = m; document.querySelectorAll('#qSeg button').forEach(x => x.classList.toggle('on', x.dataset.q === m));
+  $('#qLabel').textContent = m === 'os' ? 'Orden de servicio' : 'Número de cuenta';
+  $('#qPre').hidden = m !== 'os'; const i = $('#qIn'); i.value = ''; i.placeholder = m === 'os' ? '12345678' : '0101234567';
+  $('#qHint').textContent = m === 'os' ? 'Al buscar se abre la evaluación de la orden con el historial de la cuenta.' : 'Se muestran todos los servicios de la cuenta; toca uno para evaluarlo.';
+  $('#qRes').innerHTML = ''; i.focus();
+}
+$('#qIn').addEventListener('input', e => { const t = e.target, v = qModo === 'os' ? t.value.toUpperCase().replace(/^OS-?/, '').replace(/\D/g, '').slice(0, 8) : t.value.replace(/\D/g, ''); if (t.value !== v) t.value = v; });
 $('#qIn').addEventListener('keydown', e => { if (e.key === 'Enter') consultar(); });
 $('#btnQ').onclick = consultar;
 function fechaDe(t) { const m = /(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/.exec(t || ''); return m ? new Date(+m[3], +m[2] - 1, +m[1], +(m[4] || 0), +(m[5] || 0)) : null; }
@@ -971,7 +1013,7 @@ async function consultar() {
   let params, osBuscada = '';
   if (qModo === 'os') { const d = raw.replace(/\D/g, ''); if (d.length !== 8) return toast('La OS debe tener 8 dígitos'); osBuscada = 'OS-' + d; params = { os: osBuscada }; }
   else params = { cuenta: raw };
-  out.innerHTML = `<div class="note info">Buscando…</div>`;
+  out.innerHTML = ''; busy(qModo === 'os' ? `Buscando ${osBuscada}…` : `Buscando cuenta ${raw}…`);
   try {
     const r = await api(qModo === 'os' ? 'buscarOS' : 'buscarCuenta', params);
     const grupos = {};
@@ -982,32 +1024,32 @@ async function consultar() {
     const keys = Object.keys(grupos);
     capTextos = [];
     const aviso = r.baseError ? `<div class="note warn">Base de OS: ${esc(r.baseError)}</div>` : '';
-    if (!keys.length) { out.innerHTML = aviso + `<div class="note warn">Sin OS ni evidencias para la cuenta ${esc(raw)}. Busca por orden de servicio para capturarla manualmente.</div>`; return; }
+    if (!keys.length) { busy(null); out.innerHTML = aviso + `<div class="note warn">Sin OS ni evidencias para la cuenta ${esc(raw)}. Busca por orden de servicio para capturarla manualmente.</div>`; return; }
     const fecha = k => { const g = grupos[k]; const d = fechaDe(g.base && g.base.fechaAsignacion) || fechaDe(g.caps[0] && g.caps[0].registro); return d ? d.getTime() : 0; };
     keys.sort((a, b) => (b === osBuscada) - (a === osBuscada) || fecha(b) - fecha(a));
     const cnt = { fut: 0, hoy: 0, pas: 0 };
     keys.forEach(k => { const w = cuandoDe(grupos[k].base && grupos[k].base.fechaAsignacion).k; if (cnt[w] != null) cnt[w]++; });
     const cuenta = (r.base && r.base.cuenta) || (keys.map(k => grupos[k].base).find(Boolean) || {}).cuenta || (qModo === 'cuenta' ? raw : '');
+    histActual = { grupos, keys, cuenta, cnt, aviso };
+    busy(null);
+    if (osBuscada) { evaluar(osBuscada); return; }
     const resumen = `<div class="sect">${cuenta ? 'Cuenta ' + esc(cuenta) + ' · ' : ''}${keys.length} servicio${keys.length === 1 ? '' : 's'}${cnt.fut ? ` · ${cnt.fut} próxima${cnt.fut === 1 ? '' : 's'}` : ''}${cnt.hoy ? ` · ${cnt.hoy} hoy` : ''}${cnt.pas ? ` · ${cnt.pas} pasada${cnt.pas === 1 ? '' : 's'}` : ''}</div>`;
     let html = aviso + resumen;
     keys.forEach((k, i) => {
-      if (osBuscada && i === 1) html += `<div class="sect">Otros servicios de la cuenta</div>`;
-      html += resHTML(k, grupos[k], k === osBuscada);
+      html += resHTML(k, grupos[k], false);
     });
-    if (osBuscada && keys.length === 1 && grupos[osBuscada].base) html += `<div class="note info">La cuenta no tiene otros servicios en la base.</div>`;
     out.innerHTML = html;
-  } catch (e) { out.innerHTML = `<div class="note err">${esc(e.message)}</div>`; }
+  } catch (e) { busy(null); out.innerHTML = `<div class="note err">${esc(e.message)}</div>`; }
 }
-function resHTML(os, g, principal) {
+let histActual = null;
+function resHTML(os, g, actual) {
   const b = g.base || {}, n = g.caps.length, w = cuandoDe(b.fechaAsignacion), u = g.caps[0];
   const linea = [b.fechaAsignacion, b.estatus, b.tecnico].filter(Boolean).map(esc).join(' · ');
-  return `<div class="card res${principal ? ' main' : ''}"><div class="rh">
-    <b>${esc(os)}</b>${g.base ? `<em class="when ${w.k}">${w.txt}</em>` : ''}
+  return `<div class="card res${actual ? ' actual' : ''}"${actual ? '' : ` data-eval="${esc(os)}" role="button" tabindex="0"`}><div class="rh">
+    <b>${esc(os)}</b>${g.base ? `<em class="when ${w.k}">${w.txt}</em>` : ''}${actual ? '<em class="when hoy" style="background:var(--tp-l);color:var(--tp)">En evaluación</em>' : ''}
     <small>${esc([b.tipo, b.subtipo].filter(Boolean).join(' / ')) || (g.base ? '' : '⚠️ No está en la base de la bitácora')}</small>
-    ${linea ? `<small>${linea}</small>` : ''}${b.titular ? `<small>Titular: ${esc(b.titular)}</small>` : ''}
-    ${u ? `<small>Última captura: <b style="font-size:12.5px">${esc(u.flujo)}</b> · ${esc(u.registro)}</small>` : ''}</div>
-    <div class="row"><button class="btn${principal ? '' : ' sec'}" data-eval="${esc(os)}">▶ Evaluar esta OS</button></div>
-    ${n ? `<details class="evs"><summary>Ver evidencias guardadas (${n})</summary><div class="in">${g.caps.map(capHTML).join('')}</div></details>` : ''}
+    ${linea ? `<small>${linea}</small>` : ''}
+    ${n ? `<small>📁 ${n} captura${n === 1 ? '' : 's'} · última: <b style="font-size:12.5px">${esc(u.flujo)}</b> · ${esc(u.registro)}</small>` : ''}</div>
   </div>`;
 }
 document.addEventListener('click', e => { const b = e.target.closest('[data-eval]'); if (b) evaluar(b.dataset.eval); });
@@ -1032,11 +1074,13 @@ function flujoDe(b) {
   return '';
 }
 function evaluar(os) {
+  if (S && S.desdeEval && dirty() && S.osDig !== String(os).replace(/\D/g, '') && !confirm('¿Cambiar de OS? Se perderán los datos capturados de la actual.')) return;
   const d = String(os).replace(/\D/g, ''), base = ordenesVistas['OS-' + d] || null;
   S = { flujo: 'evaluacion', folio: genFolio(), osDig: d, base, osEstado: base ? 'ok' : 'noexiste', manual: {}, desdeEval: true, cuentaManual: '',
     contacto: { localizado: '', tel: '', motivo: '', motivoOtro: '', marcados: (base && base.telCliente) || '' },
     campos: {}, fachada: null, equipos: [], series: [], fibra: { tipo: '', metros: '', qr: '', qrImg: '' }, cierre: null, cierreNom: '', cierrePuerto: '', comentarios: '' };
-  go('eval'); getPos(0);
+  if (cur === 'eval') { renderEval(); window.scrollTo(0, 0); } else go('eval');
+  getPos(0);
 }
 function renderEval() {
   const b = S.base || {}, m = datosOS(), ct = S.contacto;
@@ -1054,6 +1098,7 @@ function renderEval() {
       ${CAMPOS_OS.map(campo).join('')}
       <datalist id="tiposOS"><option>Instalación</option><option>Soporte</option><option>Empresarial</option><option>Addon</option><option>Extender</option><option>Cambio de Domicilio</option><option>Recolección</option></datalist>
     </div>
+    ${histHTML()}
     <div class="card"><h3>💬 Mensaje de la orden</h3>
       <pre class="wa" id="evalTxt"></pre>
       <div class="row"><button class="btn wa" data-act="waEval">Enviar por WhatsApp</button><button class="btn sec shrink" data-act="cpEval">📋</button></div>
@@ -1063,6 +1108,20 @@ function renderEval() {
       <div id="locBox"></div>
     </div>`;
   renderLoc(); pintarEval();
+}
+function histHTML() {
+  const h = histActual, os = 'OS-' + S.osDig;
+  if (!h || !h.grupos[os] && !h.keys.length) return '';
+  const g = h.grupos[os] || { base: S.base, caps: [] }, otros = h.keys.filter(k => k !== os);
+  capTextos = [];
+  const evid = g.caps.length ? `<details class="evs"><summary>📁 Evidencias guardadas de esta OS (${g.caps.length})</summary><div class="in">${g.caps.map(capHTML).join('')}</div></details>` : '';
+  const c = { fut: 0, hoy: 0, pas: 0 }; otros.forEach(k => { const w = cuandoDe(h.grupos[k].base && h.grupos[k].base.fechaAsignacion).k; if (c[w] != null) c[w]++; });
+  const res = [c.fut && `${c.fut} próxima${c.fut === 1 ? '' : 's'}`, c.hoy && `${c.hoy} hoy`, c.pas && `${c.pas} pasada${c.pas === 1 ? '' : 's'}`].filter(Boolean).join(' · ');
+  return `<div class="card"><h3>🗂️ Historial de la cuenta ${h.cuenta ? esc(h.cuenta) : ''}</h3>
+    ${h.aviso || ''}
+    ${otros.length ? `<p class="hint" style="margin:0 0 4px">${otros.length} servicio${otros.length === 1 ? '' : 's'} más${res ? ' · ' + res : ''}. Toca uno para evaluarlo.</p>${otros.map(k => resHTML(k, h.grupos[k], false)).join('')}`
+      : `<div class="note info" style="margin-top:4px">${S.base ? 'La cuenta no tiene otros servicios en la base.' : 'Sin historial: la OS no está en la base de la bitácora.'}</div>`}
+    ${evid}</div>`;
 }
 function renderLoc() {
   const ct = S.contacto, el = $('#locBox'); if (!el) return;
@@ -1098,7 +1157,7 @@ function textoIloc() {
   if (c.marcados.trim()) L.push('*Teléfonos marcados*:', c.marcados.trim());
   L.push('*Fecha y hora del intento*:', fmtF(new Date()));
   if (m.coords) L.push(`*Coordenadas OS*: ${m.coords}`);
-  if (S.fachada) { const d = distOS(S.fachada); L.push(`📷 *Fachada:* ${S.fachada.fechaTxt} · ${S.fachada.coords || 'sin ubicación'}${d != null ? ` · _a ${d} m de la OS_` : ''}`); }
+  if (S.fachada) { const f = S.fachada, d = distOS(f); L.push(`📷 *Fachada:* ${f.fechaTxt} · ${f.coords || 'sin ubicación'}${d != null ? ` · _a ${d} m de la OS_` : ''}`); if (f.nav && f.ubTipo !== 'exif') L.push(`   📍 ${f.ubTipo === 'os' ? 'Sin metadatos, ubicación de la OS' : 'Sin metadatos'}: ${f.nav}`); }
   if (S.comentarios.trim()) L.push(`*Comentarios:* ${S.comentarios.trim()}`);
   const al = todasAlertas(); if (al.length) { L.push('⚠️ *Alertas:*'); al.forEach(a => L.push('   • ' + a)); }
   L.push('', `*Folio:* ${S.folio}`); if (cfg.nombre) L.push(`*Capturó:* ${cfg.nombre}`);
