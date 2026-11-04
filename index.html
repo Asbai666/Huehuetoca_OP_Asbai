@@ -7,6 +7,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Evidencias D29 Huehuetoca</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/full.umd.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -182,6 +185,36 @@ pre.wa{white-space:pre-wrap;word-break:break-word;background:#e8f8ee;border:1px 
 .big2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .big2 .btn{min-height:64px;font-size:15.5px}
 .big2 .btn.on.si{background:var(--ok);color:#fff}.big2 .btn.on.no{background:var(--err);color:#fff}
+.mis .item{display:flex;align-items:center;gap:10px;padding:10px 4px;border-top:1px solid var(--line);cursor:pointer}
+.mis .item:first-of-type{border-top:0}
+.mis .item:active{background:var(--tp-l)}
+.mis .item .t{flex:1;min-width:0}
+.mis .item .t b{display:block;font-size:15.5px}
+.mis .item .t small{display:block;color:var(--mute);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mis .item .st{font-size:11px;font-weight:800;border-radius:999px;padding:4px 8px;white-space:nowrap}
+.st.ok{background:#e6f4ee;color:var(--ok)}.st.pen{background:#fff3e0;color:var(--warn)}
+.acc{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.acc .btn{flex-direction:column;gap:2px;min-height:58px;font-size:12.5px;padding:6px}
+.acc .btn span{font-size:20px;line-height:1}
+.acc .btn.dis{opacity:.4;pointer-events:none}
+.intentos{margin:8px 0 0;padding:0;list-style:none;font-size:13px}
+.intentos li{padding:6px 8px;background:#f1f4f7;border-radius:8px;margin-top:4px;display:flex;justify-content:space-between;gap:8px}
+.intentos li button{border:0;background:none;color:var(--err);font-size:14px}
+.pasos{display:flex;gap:4px;overflow-x:auto;margin:0 0 12px;padding-bottom:2px}
+.pasos button{flex:1 0 auto;border:0;border-radius:999px;padding:7px 10px;font:inherit;font-size:12.5px;font-weight:800;background:#e7ecf1;color:var(--mute);white-space:nowrap}
+.pasos button.on{background:var(--tp);color:#fff}
+.pasos button.ok{background:#e6f4ee;color:var(--ok)}
+.pasos button.bad{background:#fde8eb;color:var(--err)}
+.navpasos{display:flex;gap:8px}
+.navpasos .btn{flex:1}
+.check{list-style:none;margin:6px 0 0;padding:0}
+.check li{display:flex;gap:10px;align-items:flex-start;padding:10px 4px;border-top:1px solid var(--line);cursor:pointer}
+.check li:first-child{border-top:0}
+.check li b{display:block}
+.check li small{color:var(--err);font-size:12.5px}
+.scanlist{max-width:520px;margin:10px auto 0;width:100%;max-height:22vh;overflow:auto;font-size:14px}
+.scanlist div{background:rgba(255,255,255,.12);border-radius:8px;padding:6px 10px;margin-top:4px;font-weight:700;word-break:break-all}
+.chip.warn{background:#fff3e0;color:var(--warn)}
 .foot{text-align:center;font-size:11.5px;color:var(--mute);margin-top:22px}
 .stick{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom));z-index:10}
 </style>
@@ -205,6 +238,8 @@ pre.wa{white-space:pre-wrap;word-break:break-word;background:#e8f8ee;border:1px 
       <p><b>Evaluación y evidencias de OS.</b><br>Busca la orden de servicio o la cuenta para ver su historial, evaluar la visita y enviar el reporte por WhatsApp.</p>
     </div>
     <div id="modeNote"></div>
+    <div id="draftNote"></div>
+    <div class="card mis" id="misCard"></div>
     <div class="card">
       <h3>🔎 Buscar</h3>
       <div class="seg" id="qSeg">
@@ -223,7 +258,8 @@ pre.wa{white-space:pre-wrap;word-break:break-word;background:#e8f8ee;border:1px 
     <div class="grid">
       <button class="tile wide" data-go="carga"><span class="ic">📥</span><span>Cargar bitácora<small>Actualiza la base de OS con el Excel del día (coordinación)</small></span></button>
     </div>
-    <div class="foot">Totalplay · Distrito 29 Huehuetoca · Coordinación PI</div>
+    <button class="btn sec block" id="btnInstalar" hidden style="margin-top:12px">📲 Instalar la app en este teléfono</button>
+    <div class="foot">Totalplay · Distrito 29 Huehuetoca · Coordinación PI · v2026.11.03</div>
   </section>
 
   <!-- ================= EVALUACIÓN ================= -->
@@ -270,6 +306,10 @@ pre.wa{white-space:pre-wrap;word-break:break-word;background:#e8f8ee;border:1px 
       <h3>⚙️ Ajustes</h3>
       <label>Tu nombre (aparece como “Capturó”)</label>
       <input id="cfgNombre" placeholder="Nombre y apellido" autocomplete="name">
+      <label>Soy técnico (para ver “Mis OS de hoy”)</label>
+      <input id="cfgTecnico" list="dlTecnicos" placeholder="Elige tu nombre como aparece en la bitácora" autocomplete="off">
+      <datalist id="dlTecnicos"></datalist>
+      <p class="hint" style="margin:6px 0 0">Déjalo vacío si eres de coordinación.</p>
       <label>WhatsApp destino (opcional, con lada país, ej. 5215512345678)</label>
       <input id="cfgWa" inputmode="tel" placeholder="Vacío = elegir chat al enviar">
       <label>URL del servicio (Apps Script /exec)</label>
@@ -294,7 +334,8 @@ pre.wa{white-space:pre-wrap;word-break:break-word;background:#e8f8ee;border:1px 
 <div class="modal" id="scanModal" hidden>
   <h4 id="scanTitle">Escanear</h4>
   <div id="reader"></div>
-  <p style="text-align:center;font-size:13px;opacity:.8">Centra el código QR o de barras dentro del recuadro</p>
+  <p style="text-align:center;font-size:13px;opacity:.8" id="scanHint">Centra el código QR o de barras dentro del recuadro</p>
+  <div class="scanlist" id="scanList"></div>
   <div class="row"><button class="btn sec" id="btnScanClose">Cancelar</button></div>
 </div>
 <div class="lb" id="lb" hidden><img id="lbImg" alt="Evidencia"><p id="lbTxt"></p><div class="row"><a class="btn sec" id="lbDrive" target="_blank" rel="noopener">Abrir en Drive</a><button class="btn" id="lbClose">Cerrar</button></div></div>
@@ -314,7 +355,10 @@ const APP = {
   /* Metadatos obligatorios (EXIF) */
   EXIF_GALERIA_OBLIGATORIO: false, // true = rechaza fotos de galería sin fecha y GPS en metadatos. false = se aceptan y, sin GPS, se usa la ubicación de la OS con enlace de navegación
   EXIF_CAMARA_OBLIGATORIO: false,  // fotos tomadas en la app: true = también se rechazan sin GPS en metadatos (en Android suele venir sin GPS)
-  GALERIA_MAX_HORAS: 0             // 0 = sin límite; p. ej. 24 = rechaza fotos de galería con más de 24 h
+  GALERIA_MAX_HORAS: 0,            // 0 = sin límite; p. ej. 24 = rechaza fotos de galería con más de 24 h
+  /* Reglas de cliente ilocalizable */
+  ILOC_MIN_INTENTOS: 2,            // intentos de contacto registrados antes de poder marcar ilocalizable
+  ILOC_FOTO_OBLIGATORIA: true      // foto de fachada obligatoria para ilocalizable
 };
 
 /* ======================== FLUJOS ======================== */
@@ -383,7 +427,7 @@ async function copiar(t) {
 }
 
 /* ======================== AJUSTES ======================== */
-let cfg = (() => { const s = LSget('d29_cfg') || {}; return { apiUrl: s.apiUrl || APP.API_URL, token: s.token || APP.TOKEN, nombre: s.nombre || '', waNum: s.waNum || '', admin: s.admin || '' }; })();
+let cfg = (() => { const s = LSget('d29_cfg') || {}; return { apiUrl: s.apiUrl || APP.API_URL, token: s.token || APP.TOKEN, nombre: s.nombre || '', waNum: s.waNum || '', admin: s.admin || '', tecnico: s.tecnico || '' }; })();
 function demo() { return !cfg.apiUrl; }
 
 /* ======================== API ======================== */
@@ -462,14 +506,13 @@ function go(v, push = true) {
   $('#viewTitle').textContent = v === 'form' && S ? FLUJOS[S.flujo].titulo : (TITULOS[v] || '');
   if (v === 'ajustes') fillCfg();
   if (v === 'carga') $('#cfgAdmin').value = cfg.admin || '';
-  if (v === 'home') renderModeNote();
+  if (v === 'home') { renderModeNote(); renderMisOS(); pintarBorrador(); }
   if (v === 'eval' && S) renderEval();
   window.scrollTo(0, 0);
   if (push) history.pushState({ v }, '', '#' + v);
 }
 window.addEventListener('popstate', e => {
   const v = (e.state && e.state.v) || 'home';
-  if ((cur === 'form' || cur === 'eval') && v === 'home' && dirty() && !confirm('¿Salir de la captura? Se perderán los datos.')) { history.pushState({ v: cur }, '', '#' + cur); return; }
   if ((v === 'form' || v === 'eval') && !S) return go('home', false);
   go(v, false);
 });
@@ -527,7 +570,8 @@ function campoHTML(c) {
 function renderForm() {
   const f = FLUJOS[S.flujo];
   const ct = S.contacto || {};
-  let h = S.desdeEval
+  const P = [];
+  let datos = S.desdeEval
     ? `<div class="card" id="secOS"><h3>🧾 Orden de servicio</h3><div class="osfix">OS-${esc(S.osDig)}</div>
       <div id="osData">${renderBase()}</div>
       ${ct.localizado === 'Sí' ? `<div class="note ok">📞 Cliente localizado${ct.tel ? ' · Tel: ' + esc(ct.tel) : ''}</div>` : ''}</div>`
@@ -535,20 +579,21 @@ function renderForm() {
     <div class="osbox" id="osBox"><span>OS-</span><input id="osIn" inputmode="numeric" maxlength="12" placeholder="12345678" autocomplete="off" value="${S.osDig}"></div>
     <div class="errmsg" id="osErr"></div>
     <div id="osData">${renderBase()}</div></div>`;
-  if (f.campos.length) h += `<div class="card" id="secCampos"><h3>${f.icon} Datos de ${esc(f.sub.toLowerCase())}</h3>${f.campos.map(campoHTML).join('')}</div>`;
-  if (f.fachada) h += `<div class="card" id="secFachada"><h3>🏠 Foto panorámica de fachada ${tagFor(f.fachada)}</h3>
+  if (f.campos.length) datos += `<div class="card" id="secCampos"><h3>${f.icon} Datos de ${esc(f.sub.toLowerCase())}</h3>${f.campos.map(campoHTML).join('')}</div>`;
+  P.push({ k: 'datos', t: 'Datos', h: datos });
+  if (f.fachada) P.push({ k: 'fachada', t: 'Fachada', h: `<div class="card" id="secFachada"><h3>🏠 Foto panorámica de fachada ${tagFor(f.fachada)}</h3>
     <p class="hint">Toma la foto en horizontal, con la fachada completa y el número exterior visibles. Fecha, hora y ubicación se leen de la foto y quedan bloqueadas.</p>
     <div id="fachadaErr"></div><div id="fachadaBox"></div>
-    <div class="row"><button class="btn" data-act="cam" data-kind="fachada">📷 Tomar foto</button><button class="btn sec" data-act="gal" data-kind="fachada">🖼️ Galería</button></div></div>`;
-  if (f.equipos) h += `<div class="card" id="secEquipos"><h3>📡 ${esc(f.equiposLabel || 'Equipo(s) instalado(s)')} ${tagFor(f.equipos)}</h3>
+    <div class="row"><button class="btn" data-act="cam" data-kind="fachada">📷 Tomar foto</button><button class="btn sec" data-act="gal" data-kind="fachada">🖼️ Galería</button></div></div>` });
+  if (f.equipos) P.push({ k: 'equipos', t: 'Equipos', h: `<div class="card" id="secEquipos"><h3>📡 ${esc(f.equiposLabel || 'Equipo(s) instalado(s)')} ${tagFor(f.equipos)}</h3>
     <p class="hint">Foto panorámica del equipo o equipos y la serie de cada uno.</p>
     <div id="equipoErr"></div><div id="equiposBox"></div>
     <div class="row"><button class="btn" data-act="cam" data-kind="equipo">📷 Foto de equipo</button><button class="btn sec" data-act="gal" data-kind="equipo">🖼️ Galería</button></div>
     <label for="serieIn">Series de equipos${f.equipos === 'req' ? ' <span class="rq">*</span>' : ''}</label>
-    <div class="row" style="margin-top:0"><input id="serieIn" placeholder="Escribe o escanea la serie" autocapitalize="characters" autocomplete="off"><button class="btn shrink" data-act="addSerie">＋</button></div>
-    <div class="row"><button class="btn sec sm" data-act="scan" data-for="serie">▦ Escanear QR / barras</button><button class="btn sec sm" data-act="scanFile" data-for="serie">🖼️ Leer de una foto</button></div>
-    <div class="chips" id="seriesBox"></div></div>`;
-  if (f.cierre) h += `<div class="card" id="secCierre"><h3>🔌 Datos del Cierre 2N ${tagFor(f.cierre)}</h3>
+    <div class="row"><button class="btn" data-act="scan" data-for="serie">▦ Escanear series</button><button class="btn sec shrink" data-act="scanFile" data-for="serie">🖼️</button></div>
+    <div class="row"><input id="serieIn" placeholder="O escribe la serie" autocapitalize="characters" autocomplete="off"><button class="btn shrink" data-act="addSerie">＋</button></div>
+    <div class="chips" id="seriesBox"></div></div>` });
+  if (f.cierre) P.push({ k: 'cierre', t: 'Cierre 2N', h: `<div class="card" id="secCierre"><h3>🔌 Datos del Cierre 2N ${tagFor(f.cierre)}</h3>
     <label for="cierreNom">Nomenclatura${f.cierre === 'req' ? ' <span class="rq">*</span>' : ''}</label>
     <input id="cierreNom" style="text-transform:uppercase" value="${esc(S.cierreNom)}" autocapitalize="characters" autocomplete="off" placeholder="Nomenclatura del cierre">
     <label for="cierrePuerto">Puerto asignado por AAPO${f.cierre === 'req' ? ' <span class="rq">*</span>' : ''}</label>
@@ -556,14 +601,56 @@ function renderForm() {
     <label>Foto del Cierre 2N${f.cierre === 'req' ? ' <span class="rq">*</span>' : ''}</label>
     <p class="hint" style="margin-top:0">Fecha, hora y ubicación se leen de los metadatos de la foto y quedan bloqueadas.</p>
     <div id="cierreErr"></div><div id="cierreBox"></div>
-    <div class="row"><button class="btn" data-act="cam" data-kind="cierre">📷 Tomar foto</button><button class="btn sec" data-act="gal" data-kind="cierre">🖼️ Galería</button></div></div>`;
-  if (f.fibra) h += `<div class="card" id="secFibra"><h3>🧵 Fibra utilizada ${tagFor(f.fibra)}</h3>
+    <div class="row"><button class="btn" data-act="cam" data-kind="cierre">📷 Tomar foto</button><button class="btn sec" data-act="gal" data-kind="cierre">🖼️ Galería</button></div></div>` });
+  if (f.fibra) P.push({ k: 'fibra', t: 'Fibra', h: `<div class="card" id="secFibra"><h3>🧵 Fibra utilizada ${tagFor(f.fibra)}</h3>
     <div class="seg" id="fibraSeg"><button data-act="fibra" data-v="unifibra">Unifibra</button><button data-act="fibra" data-v="precon">Preconectorizada</button>${f.fibra === 'opt' ? '<button data-act="fibra" data-v="">Ninguna</button>' : ''}</div>
-    <div id="fibraBox"></div></div>`;
-  h += `<div class="card"><h3>📝 Comentarios ${tagFor('opt')}</h3><textarea id="coment" placeholder="Observaciones adicionales">${esc(S.comentarios)}</textarea></div>
-    <div class="stick"><button class="btn block big" data-act="guardar">💾 Guardar y generar texto</button></div>`;
-  $('#formBody').innerHTML = h;
+    <div id="fibraBox"></div></div>` });
+  P.push({ k: 'revision', t: 'Revisión', h: `<div class="card"><h3>📝 Comentarios ${tagFor('opt')}</h3><textarea id="coment" placeholder="Observaciones adicionales">${esc(S.comentarios)}</textarea></div>
+    <div class="card"><h3>✅ Revisión final</h3><p class="hint" style="margin:0">Toca un punto para ir a corregirlo.</p><ul class="check" id="checkList"></ul></div>` });
+  S.pasos = P.map(x => ({ k: x.k, t: x.t }));
+  if (S.paso == null || S.paso >= P.length) S.paso = 0;
+  S.pasoMax = Math.max(S.pasoMax || 0, S.paso);
+  $('#formBody').innerHTML = `<div class="pasos" id="pasosBar"></div>`
+    + P.map((x, i) => `<div class="paso" data-paso="${i}"${i === S.paso ? '' : ' hidden'}>${x.h}</div>`).join('')
+    + `<div class="stick navpasos" id="navPasos"></div>`;
   renderFotos('fachada'); renderFotos('equipo'); renderFotos('cierre'); renderSeries(); renderFibra();
+  pintarPasos();
+}
+function erroresPorPaso() {
+  const errs = validar(), por = {};
+  document.querySelectorAll('#formBody .err').forEach(x => x.classList.remove('err'));
+  const o = $('#osErr'); if (o) o.textContent = '';
+  errs.forEach(e => { const pe = e.el && e.el.closest('.paso'); const i = pe ? +pe.dataset.paso : 0; (por[i] = por[i] || []).push(e); });
+  return { errs, por };
+}
+function pintarPasos() {
+  if (!S || !S.pasos || !$('#pasosBar')) return;
+  const { por } = erroresPorPaso(), ult = S.pasos.length - 1;
+  $('#pasosBar').innerHTML = S.pasos.map((x, i) => `<button data-act="irPaso" data-i="${i}" class="${i === S.paso ? 'on' : i <= S.pasoMax && i < ult ? (por[i] ? 'bad' : 'ok') : ''}">${i + 1}. ${esc(x.t)}</button>`).join('');
+  const bar = $('#pasosBar .on'); if (bar) bar.scrollIntoView({ inline: 'center', block: 'nearest' });
+  $('#navPasos').innerHTML = (S.paso > 0 ? `<button class="btn sec big" data-act="antPaso">‹ Anterior</button>` : '')
+    + (S.paso < ult ? `<button class="btn big" data-act="sigPaso">Siguiente ›</button>` : `<button class="btn big" data-act="guardar">💾 Guardar y generar texto</button>`);
+  if (S.paso === ult) {
+    const fotos = [S.fachada, S.cierre, ...S.equipos].filter(Boolean).length;
+    $('#checkList').innerHTML = S.pasos.slice(0, ult).map((x, i) => `<li data-act="irPaso" data-i="${i}"><span>${por[i] ? '❌' : '✅'}</span><div><b>${i + 1}. ${esc(x.t)}</b>${por[i] ? `<small>Falta: ${por[i].map(e => esc(e.msg)).join(' · ')}</small>` : ''}</div></li>`).join('')
+      + `<li><span>📊</span><div><b>${fotos} foto${fotos === 1 ? '' : 's'} · ${S.series.length} serie${S.series.length === 1 ? '' : 's'}</b>${todasAlertas().length ? `<small>${todasAlertas().length} alerta(s): ${esc(todasAlertas()[0])}${todasAlertas().length > 1 ? '…' : ''}</small>` : ''}</div></li>`;
+  }
+}
+function irPaso(i, validarActual, marcar) {
+  if (!S || !S.pasos) return;
+  if (validarActual && i > S.paso) {
+    const { por } = erroresPorPaso(), mis = por[S.paso];
+    if (mis) {
+      mis.forEach(e => e.el && e.el.classList.add('err'));
+      const el = mis[0].el; if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      toast('Falta: ' + mis.map(e => e.msg).slice(0, 3).join(' · '), 4000); return;
+    }
+  }
+  S.paso = Math.max(0, Math.min(i, S.pasos.length - 1)); S.pasoMax = Math.max(S.pasoMax || 0, S.paso);
+  document.querySelectorAll('#formBody .paso').forEach(x => x.hidden = +x.dataset.paso !== S.paso);
+  window.scrollTo(0, 0); pintarPasos();
+  if (marcar) { const { por } = erroresPorPaso(); (por[S.paso] || []).forEach(e => e.el && e.el.classList.add('err')); }
+  guardarBorrador();
 }
 
 /* ---- OS ---- */
@@ -615,18 +702,25 @@ document.addEventListener('click', e => {
     renderFotos(b.dataset.kind);
   }
   else if (a === 'addSerie') addSerie($('#serieIn').value);
-  else if (a === 'delSerie') { S.series.splice(+b.dataset.i, 1); renderSeries(); }
+  else if (a === 'delSerie') { const v = S.series.splice(+b.dataset.i, 1)[0]; if (S.seriesAlerta) delete S.seriesAlerta[v]; renderSeries(); guardarBorrador(); }
   else if (a === 'scan') abrirEscaner(b.dataset.for);
   else if (a === 'scanFile') { scanFor = b.dataset.for; $('#inScan').value = ''; $('#inScan').click(); }
   else if (a === 'fibra') { S.fibra.tipo = b.dataset.v; renderFibra(); }
   else if (a === 'qrManual') { const t = prompt('Escribe el código de la fibra:'); if (t && t.trim()) { S.fibra.qr = t.trim(); S.fibra.qrFuente = 'Manual'; renderFibra(); } }
   else if (a === 'buscarOS') buscarOS();
   else if (a === 'guardar') guardar();
+  else if (a === 'sigPaso') irPaso(S.paso + 1, true);
+  else if (a === 'antPaso') irPaso(S.paso - 1);
+  else if (a === 'irPaso') irPaso(+b.dataset.i, false, true);
   else if (a === 'ubTel' || a === 'ubOS') cambiarUbicacion(b.dataset.kind, +b.dataset.i, a);
-  else if (a === 'loc') { S.contacto.localizado = b.dataset.v; document.querySelectorAll('[data-act="loc"]').forEach(x => x.classList.toggle('on', x === b)); renderLoc(); pintarEval(); }
+  else if (a === 'loc') { S.contacto.localizado = b.dataset.v; document.querySelectorAll('[data-act="loc"]').forEach(x => x.classList.toggle('on', x === b)); renderLoc(); pintarEval(); pintarIntentos(); }
   else if (a === 'waEval') { const f = faltanEval(); if (f.length) return marcarFaltas(f); guardarTelDir(); enviarWA(textoEval()); }
   else if (a === 'cpEval') copiar(textoEval()).then(ok => toast(ok ? 'Texto copiado' : 'No se pudo copiar'));
   else if (a === 'guardarIloc') guardarIloc();
+  else if (a === 'llamar') registrarIntento('Llamada');
+  else if (a === 'waCli') registrarIntento('WhatsApp');
+  else if (a === 'addIntento') { const n = prompt('¿Desde qué teléfono o medio se intentó? (ej. Llamada desde 55…)', 'Llamada'); if (n && n.trim()) registrarIntento(n.trim()); }
+  else if (a === 'delIntento') { S.contacto.intentos.splice(+b.dataset.i, 1); pintarIntentos(); pintarEval(); }
 });
 document.addEventListener('input', e => {
   if (!S) return;
@@ -797,16 +891,34 @@ function renderFotos(kind) {
   else if (kind === 'cierre') { const el = $('#cierreBox'); if (el) el.innerHTML = S.cierre ? fotoHTML(S.cierre, 0) : ''; }
   else { const el = $('#equiposBox'); if (el) el.innerHTML = S.equipos.map(fotoHTML).join(''); }
   if (cur === 'eval') pintarEval();
+  if (cur === 'form' && S.paso === (S.pasos || []).length - 1) pintarPasos();
+  guardarBorrador();
 }
 
 /* ---- Series ---- */
 function addSerie(v) {
-  v = String(v || '').trim().toUpperCase(); if (!v) return;
-  if (S.series.includes(v)) { toast('Esa serie ya está capturada'); return; }
+  v = String(v || '').trim().toUpperCase(); if (!v) return false;
+  if (S.series.includes(v)) { toast('Esa serie ya está capturada'); return false; }
   S.series.push(v); const i = $('#serieIn'); if (i) { i.value = ''; i.classList.remove('err'); }
-  renderSeries();
+  renderSeries(); verificarSerie(v); guardarBorrador();
+  return true;
 }
-function renderSeries() { const el = $('#seriesBox'); if (el) el.innerHTML = S.series.map((s, i) => `<span class="chip"><i>${i + 1}</i>${esc(s)}<button data-act="delSerie" data-i="${i}" aria-label="Quitar">✕</button></span>`).join(''); }
+async function verificarSerie(v) {
+  if (demo()) return;
+  try {
+    const r = await api('serie', { serie: v, os: 'OS-' + S.osDig });
+    if (S && r.usadas && r.usadas.length && S.series.includes(v)) {
+      S.seriesAlerta = S.seriesAlerta || {};
+      S.seriesAlerta[v] = `Serie ${v} ya registrada en ${r.usadas.map(u => u.os + (u.registro ? ' (' + u.registro + ')' : '')).join(', ')}`;
+      renderSeries(); toast('⚠️ ' + S.seriesAlerta[v], 6000);
+    }
+  } catch (e) {}
+}
+function renderSeries() {
+  const el = $('#seriesBox'), al = (S && S.seriesAlerta) || {};
+  if (el) el.innerHTML = S.series.map((s, i) => `<span class="chip${al[s] ? ' warn' : ''}"${al[s] ? ` title="${esc(al[s])}"` : ''}><i>${al[s] ? '⚠️' : i + 1}</i>${esc(s)}<button data-act="delSerie" data-i="${i}" aria-label="Quitar">✕</button></span>`).join('');
+  pintarScanList();
+}
 
 /* ---- Fibra ---- */
 function renderFibra() {
@@ -827,16 +939,35 @@ function formatos() {
   const F = Html5QrcodeSupportedFormats;
   return [F.QR_CODE, F.CODE_128, F.CODE_39, F.CODE_93, F.EAN_13, F.EAN_8, F.UPC_A, F.UPC_E, F.ITF, F.DATA_MATRIX, F.CODABAR, F.PDF_417].filter(v => v !== undefined);
 }
+let scanVistos = {};
+function pintarScanList() {
+  const el = $('#scanList'); if (!el || $('#scanModal').hidden || scanFor !== 'serie' || !S) { if (el && scanFor !== 'serie') el.innerHTML = ''; return; }
+  el.innerHTML = S.series.length ? `<div style="background:none;padding:0;font-weight:800">Series capturadas (${S.series.length}):</div>` + S.series.slice().reverse().map(x => `<div>${esc(x)}${S.seriesAlerta && S.seriesAlerta[x] ? ' ⚠️' : ''}</div>`).join('') : '';
+  $('#btnScanClose').textContent = `✓ Listo (${S.series.length})`;
+}
 async function abrirEscaner(para) {
   if (!window.Html5Qrcode) return toast('No cargó el lector de códigos. Revisa tu conexión.');
-  scanFor = para; scanHecho = false;
-  $('#scanTitle').textContent = para === 'fibra' ? 'Escanear QR de la fibra' : 'Escanear serie del equipo';
-  $('#scanModal').hidden = false;
+  scanFor = para; scanHecho = false; scanVistos = {};
+  const cont = para === 'serie';
+  $('#scanTitle').textContent = cont ? 'Escanear series (continuo)' : 'Escanear QR de la fibra';
+  $('#scanHint').textContent = cont ? 'Apunta a cada código: se agregan solos. Toca “Listo” al terminar.' : 'Centra el código QR dentro del recuadro';
+  $('#btnScanClose').textContent = cont ? `✓ Listo (${S.series.length})` : 'Cancelar';
+  $('#scanList').innerHTML = '';
+  $('#scanModal').hidden = false; pintarScanList();
   qr = new Html5Qrcode('reader', { formatsToSupport: formatos(), verbose: false, experimentalFeatures: { useBarCodeDetectorIfSupported: true } });
   try {
     await qr.start({ facingMode: 'environment' },
       { fps: 12, qrbox: (vw, vh) => { const m = Math.min(vw, vh); return { width: Math.round(m * .9), height: Math.round(m * .6) }; } },
-      txt => { if (scanHecho) return; scanHecho = true; if (navigator.vibrate) navigator.vibrate(80); cerrarEscaner(); recibirCodigo(txt, 'Cámara'); }, () => {});
+      txt => {
+        if (cont) {
+          const t = String(txt || '').trim().toUpperCase(), ahora = Date.now();
+          if (!t || (scanVistos[t] && ahora - scanVistos[t] < 3000)) return;
+          scanVistos[t] = ahora;
+          if (addSerie(t)) { if (navigator.vibrate) navigator.vibrate(90); toast('✓ ' + t, 1500); }
+          return;
+        }
+        if (scanHecho) return; scanHecho = true; if (navigator.vibrate) navigator.vibrate(80); cerrarEscaner(); recibirCodigo(txt, 'Cámara');
+      }, () => {});
   } catch (e) { cerrarEscaner(); toast('No se pudo abrir la cámara. Da permiso de cámara o usa “Leer de una foto”.'); }
 }
 async function cerrarEscaner() {
@@ -932,20 +1063,22 @@ function construirTexto() {
   add('Registro', fmtF(new Date()));
   return L.join('\n');
 }
-function todasAlertas() { const a = []; if (S.fachada) alertasDe(S.fachada).forEach(x => a.push('Fachada: ' + x)); if (S.cierre) alertasDe(S.cierre).forEach(x => a.push('Cierre 2N: ' + x)); S.equipos.forEach((p, i) => alertasDe(p).forEach(x => a.push(`Equipo ${i + 1}: ` + x))); return a; }
+function todasAlertas() { const a = []; Object.entries((S && S.seriesAlerta) || {}).forEach(([k, v]) => { if (S.series.includes(k)) a.push(v); }); if (S.fachada) alertasDe(S.fachada).forEach(x => a.push('Fachada: ' + x)); if (S.cierre) alertasDe(S.cierre).forEach(x => a.push('Cierre 2N: ' + x)); S.equipos.forEach((p, i) => alertasDe(p).forEach(x => a.push(`Equipo ${i + 1}: ` + x))); return a; }
 function metaFoto(p) { return { img: p.img, fecha: p.fecha, fechaTxt: p.fechaTxt, fuenteFecha: p.fuenteFecha, lat: p.lat, lng: p.lng, acc: p.acc, coords: p.coords, fuenteUb: p.fuenteUb, origen: p.origen, dist: distOS(p), exif: p.exifTxt || '' }; }
 
 let ultimo = null;
 async function guardar() {
   const errs = validar();
   if (errs.length) {
-    const first = errs[0].el; if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const pe = errs[0].el && errs[0].el.closest('.paso');
+    if (pe) irPaso(+pe.dataset.paso, false, true);
+    const first = errs[0].el; if (first) setTimeout(() => first.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
     toast('Falta: ' + errs.map(e => e.msg).slice(0, 3).join(' · '), 4500); return;
   }
   const f = FLUJOS[S.flujo], texto = construirTexto();
   const data = {
     folio: S.folio, flujo: S.flujo, flujoTitulo: f.titulo, os: 'OS-' + S.osDig, cuenta: datosOS().cuenta, base: datosOS(),
-    contacto: { localizado: (S.contacto || {}).localizado || '', tel: (S.contacto || {}).tel || '' },
+    contacto: { localizado: (S.contacto || {}).localizado || '', tel: (S.contacto || {}).tel || '', intentos: (S.contacto || {}).intentos || [] },
     campos: f.campos.filter(c => S.campos[c.id]).map(c => ({ id: c.id, label: c.label, valor: S.campos[c.id] })),
     fachada: S.fachada ? metaFoto(S.fachada) : null, equipos: S.equipos.map(metaFoto), series: S.series,
     cierre: FLUJOS[S.flujo].cierre ? { nomenclatura: S.cierreNom.trim(), puerto: S.cierrePuerto.trim(), foto: S.cierre ? metaFoto(S.cierre) : null } : null,
@@ -957,14 +1090,17 @@ async function guardar() {
 async function persistir(data, texto, fotos) {
   ultimo = { texto, fotos, os: data.os, guardado: false };
   busy('Subiendo fotos y guardando…');
+  clearTimeout(borrTimer);
   try {
     if (demo()) throw new Error('Este teléfono no tiene configurada la URL del servicio.');
     const r = await api('guardar', {}, { data });
     ultimo.texto = r.texto || texto; ultimo.guardado = true;
+    borrarBorrador();
     $('#doneStatus').innerHTML = `<div class="note ok" style="margin:0 0 12px">✅ Guardado en la base · Folio ${esc(r.folio)}${r.carpeta ? ` · <a href="${esc(r.carpeta)}" target="_blank" rel="noopener">ver fotos</a>` : ''}</div>`;
   } catch (e) {
     let guardadaLocal = false;
     try { await pendPut(data); guardadaLocal = true; } catch (x) {}
+    if (guardadaLocal) borrarBorrador();
     $('#doneStatus').innerHTML = guardadaLocal
       ? `<div class="note warn" style="margin:0 0 12px">⏳ No se pudo subir todavía (${esc(e.message)})<br>La captura quedó guardada en este teléfono y se subirá sola en cuanto haya conexión con el servicio. No la borres ni desinstales el navegador.</div>`
       : `<div class="note err" style="margin:0 0 12px">❌ No se guardó: ${esc(e.message)}<br><button class="btn sm" style="margin-top:8px" id="btnRetry">Reintentar guardado</button></div>`;
@@ -985,7 +1121,7 @@ $('#btnShare').onclick = async () => {
     try { await navigator.share({ files, text: ultimo.texto }); toast('Si WhatsApp no pegó el texto, mantén presionado y pega: ya está copiado.', 5000); } catch (e) {}
   } else toast('Este teléfono no permite compartir fotos desde el navegador. Usa “Enviar por WhatsApp”.', 4500);
 };
-$('#btnNew').onclick = () => { S = null; ultimo = null; history.replaceState({ v: 'home' }, '', '#home'); go('home', false); if ($('#qIn').value.trim()) consultar(); };
+$('#btnNew').onclick = () => { S = null; ultimo = null; misCache = {}; $('#qIn').value = ''; $('#qRes').innerHTML = ''; history.replaceState({ v: 'home' }, '', '#home'); go('home', false); };
 
 /* ======================== BÚSQUEDA E HISTORIAL ======================== */
 let qModo = 'os';
@@ -1062,7 +1198,10 @@ const CAMPOS_OS = [
   { k: 'distrito', l: 'Distrito' }
 ];
 const MOTIVOS_NC = ['Titular es ilocalizable', 'No contesta', 'Número equivocado / no existe', 'Buzón de voz', 'Teléfono fuera de servicio', 'Domicilio no localizado', 'Nadie en el domicilio', 'Otro'];
+const normF = x => normB(x).replace(/[^a-z0-9]+/g, ' ').trim();
 function flujoDe(b) {
+  const reglas = LSget('d29_formularios') || [], tp = normF(b.tipo), sb = normF(b.subtipo);
+  for (const r of reglas) if (FLUJOS[r.flujo] && (!r.tipo || tp.includes(r.tipo)) && (!r.subtipo || sb.includes(r.subtipo))) return r.flujo;
   const t = normB([b.tipo, b.subtipo].join(' '));
   if (/empresarial|cfo/.test(t)) return 'empresarial';
   if (/cambio de domicilio|cambio domicilio|cambio de dom/.test(t)) return 'cambioDom';
@@ -1074,13 +1213,15 @@ function flujoDe(b) {
   return '';
 }
 function evaluar(os) {
-  if (S && S.desdeEval && dirty() && S.osDig !== String(os).replace(/\D/g, '') && !confirm('¿Cambiar de OS? Se perderán los datos capturados de la actual.')) return;
+  const nd = String(os).replace(/\D/g, '');
+  if (S && S.desdeEval && dirty() && S.osDig !== nd && !confirm('¿Cambiar de OS? Se perderán los datos capturados de la actual.')) return;
+  if (!S && borradorInfo && borradorInfo.osDig !== nd && !confirm(`Tienes una captura sin terminar de OS-${borradorInfo.osDig}. ¿Descartarla y empezar OS-${nd}?`)) return;
   const d = String(os).replace(/\D/g, ''), base = ordenesVistas['OS-' + d] || null;
   S = { flujo: 'evaluacion', folio: genFolio(), osDig: d, base, osEstado: base ? 'ok' : 'noexiste', manual: {}, desdeEval: true, cuentaManual: '',
-    contacto: { localizado: '', tel: '', motivo: '', motivoOtro: '', marcados: (base && base.telCliente) || '' },
+    contacto: { localizado: '', tel: '', motivo: '', motivoOtro: '', marcados: (base && base.telCliente) || '', telCliente: (base && base.telCliente) || '', intentos: [] },
     campos: {}, fachada: null, equipos: [], series: [], fibra: { tipo: '', metros: '', qr: '', qrImg: '' }, cierre: null, cierreNom: '', cierrePuerto: '', comentarios: '' };
   if (cur === 'eval') { renderEval(); window.scrollTo(0, 0); } else go('eval');
-  getPos(0);
+  getPos(0); guardarBorrador();
 }
 function renderEval() {
   const b = S.base || {}, m = datosOS(), ct = S.contacto;
@@ -1095,6 +1236,9 @@ function renderEval() {
     <div class="card" id="secOS"><h3>🧾 Datos de la orden ${S.base ? '<em class="tag lock">Desde bitácora</em>' : ''}</h3>
       <div class="osfix">OS-${esc(S.osDig)}</div>
       ${S.base ? (extra ? `<p class="hint" style="margin:4px 0 0">${extra}</p>` : '') : `<div class="note warn">Esta OS no está en la base de la bitácora: captura los datos manualmente.</div>`}
+      <label for="telCli">Teléfono del cliente</label>
+      <input id="telCli" inputmode="tel" value="${esc(ct.telCliente)}" placeholder="10 dígitos" autocomplete="off">
+      <div class="acc" id="accBox"></div>
       ${CAMPOS_OS.map(campo).join('')}
       <datalist id="tiposOS"><option>Instalación</option><option>Soporte</option><option>Empresarial</option><option>Addon</option><option>Extender</option><option>Cambio de Domicilio</option><option>Recolección</option></datalist>
     </div>
@@ -1104,10 +1248,31 @@ function renderEval() {
       <div class="row"><button class="btn wa" data-act="waEval">Enviar por WhatsApp</button><button class="btn sec shrink" data-act="cpEval">📋</button></div>
     </div>
     <div class="card" id="secLoc"><h3>📞 ¿Se localizó al cliente?</h3>
+      <div id="intentosBox"></div>
       <div class="big2"><button class="btn sec si${ct.localizado === 'Sí' ? ' on' : ''}" data-act="loc" data-v="Sí">✅ Sí, se localizó</button><button class="btn sec no${ct.localizado === 'No' ? ' on' : ''}" data-act="loc" data-v="No">❌ No se localizó</button></div>
       <div id="locBox"></div>
     </div>`;
-  renderLoc(); pintarEval();
+  renderLoc(); pintarEval(); pintarAcciones(); pintarIntentos();
+}
+function telsDe(txt) { return (String(txt || '').match(/\d[\d\s-]{8,}\d/g) || []).map(x => x.replace(/\D/g, '').slice(-10)).filter(x => x.length === 10); }
+function pintarAcciones() {
+  const el = $('#accBox'); if (!el) return;
+  const tel = telsDe(S.contacto.telCliente)[0], b = S.base || {}, nav = okNum(b.lat) && okNum(b.lng) ? navUrl(b.lat, b.lng) : '';
+  el.innerHTML = `<a class="btn sec${tel ? '' : ' dis'}" href="${tel ? 'tel:' + tel : '#'}" data-act="llamar"><span>📞</span>Llamar</a>
+    <a class="btn sec${tel ? '' : ' dis'}" href="${tel ? 'https://wa.me/52' + tel : '#'}" target="_blank" rel="noopener" data-act="waCli"><span>💬</span>WhatsApp</a>
+    <a class="btn sec${nav ? '' : ' dis'}" href="${nav || '#'}" target="_blank" rel="noopener"><span>🧭</span>Navegar</a>`;
+}
+function registrarIntento(medio) {
+  const tel = telsDe(S.contacto.telCliente)[0] || '';
+  S.contacto.intentos.push(`${fmtF(new Date())} · ${medio}${tel ? ' a ' + tel : ''}`);
+  pintarIntentos(); pintarEval(); guardarBorrador();
+}
+function pintarIntentos() {
+  const el = $('#intentosBox'); if (!el) return;
+  const xs = S.contacto.intentos, min = APP.ILOC_MIN_INTENTOS;
+  el.innerHTML = `<label>Intentos de contacto (${xs.length}${S.contacto.localizado === 'No' && min ? ` de ${min} mínimo` : ''})</label>
+    ${xs.length ? `<ul class="intentos">${xs.map((x, i) => `<li><span>${i + 1}. ${esc(x)}</span><button data-act="delIntento" data-i="${i}" aria-label="Quitar">✕</button></li>`).join('')}</ul>` : '<p class="hint" style="margin:0">Se registran solos al tocar 📞 Llamar o 💬 WhatsApp.</p>'}
+    <button class="btn ghost sm" style="margin-top:8px" data-act="addIntento">➕ Registrar intento hecho desde otro teléfono</button>`;
 }
 function histHTML() {
   const h = histActual, os = 'OS-' + S.osDig;
@@ -1135,11 +1300,14 @@ function renderLoc() {
       <p class="hint" style="margin:12px 0 0">${k ? 'U otro formulario según el resultado de la visita:' : ''}</p>
       <div class="fgrid">${otros.map(x => `<button class="btn sec" data-flujo="${x}">${FLUJOS[x].icon} ${esc(FLUJOS[x].titulo.replace('POST-VENTA · ', ''))}</button>`).join('')}</div>`;
   } else if (ct.localizado === 'No') {
-    el.innerHTML = `<label for="motivoNC">Motivo de no contacto <span class="rq">*</span></label>
+    const g = histActual && histActual.grupos['OS-' + S.osDig], previos = g ? g.caps.filter(c => /ILOCALIZABLE/i.test(c.flujo)).length : 0;
+    el.innerHTML = `${previos ? `<div class="note warn">Esta OS ya tiene ${previos} reporte${previos === 1 ? '' : 's'} de cliente ilocalizable.</div>` : ''}
+      <div class="note info">Para marcar ilocalizable se necesitan al menos <b>${APP.ILOC_MIN_INTENTOS} intento${APP.ILOC_MIN_INTENTOS === 1 ? '' : 's'}</b> de contacto${APP.ILOC_FOTO_OBLIGATORIA ? ' y la <b>foto de fachada</b>' : ''}.</div>
+      <label for="motivoNC">Motivo de no contacto <span class="rq">*</span></label>
       <select id="motivoNC"><option value="">Selecciona…</option>${MOTIVOS_NC.map(o => `<option${ct.motivo === o ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>
       <div id="motivoOtroBox"${ct.motivo === 'Otro' ? '' : ' hidden'}><label for="motivoOtro">Especifica el motivo <span class="rq">*</span></label><input id="motivoOtro" value="${esc(ct.motivoOtro)}"></div>
       <label for="telMarc">Teléfonos marcados</label><input id="telMarc" inputmode="tel" value="${esc(ct.marcados)}" placeholder="Ej. 5511112222 / 5533334444">
-      <label>Foto de fachada <em class="tag opt">Opcional</em></label>
+      <label>Foto de fachada ${APP.ILOC_FOTO_OBLIGATORIA ? '<span class="rq">*</span>' : '<em class="tag opt">Opcional</em>'}</label>
       <p class="hint" style="margin-top:0">Evidencia de la visita; fecha, hora y ubicación se leen de los metadatos.</p>
       <div id="fachadaErr"></div><div id="fachadaBox"></div>
       <div class="row"><button class="btn sec" data-act="cam" data-kind="fachada">📷 Tomar foto</button><button class="btn sec" data-act="gal" data-kind="fachada">🖼️ Galería</button></div>
@@ -1155,7 +1323,8 @@ function textoEval() { return scriptBase(datosOS()).join('\n'); }
 function textoIloc() {
   const m = datosOS(), c = S.contacto, L = ['📵 *CLIENTE ILOCALIZABLE*', ...scriptBase(m), '*MOTIVO DE NO CONTACTO*:', ` ${motivoTxt() || 'Sin dato'}`];
   if (c.marcados.trim()) L.push('*Teléfonos marcados*:', c.marcados.trim());
-  L.push('*Fecha y hora del intento*:', fmtF(new Date()));
+  if (c.intentos.length) { L.push(`*Intentos de contacto (${c.intentos.length})*:`); c.intentos.forEach((x, i) => L.push(`${i + 1}) ${x}`)); }
+  else L.push('*Fecha y hora del intento*:', fmtF(new Date()));
   if (m.coords) L.push(`*Coordenadas OS*: ${m.coords}`);
   if (S.fachada) { const f = S.fachada, d = distOS(f); L.push(`📷 *Fachada:* ${f.fechaTxt} · ${f.coords || 'sin ubicación'}${d != null ? ` · _a ${d} m de la OS_` : ''}`); if (f.nav && f.ubTipo !== 'exif') L.push(`   📍 ${f.ubTipo === 'os' ? 'Sin metadatos, ubicación de la OS' : 'Sin metadatos'}: ${f.nav}`); }
   if (S.comentarios.trim()) L.push(`*Comentarios:* ${S.comentarios.trim()}`);
@@ -1180,17 +1349,34 @@ function marcarFaltas(f) { f.forEach(([id]) => { const e = $('#' + id); if (e) e
 function continuar(k) {
   const f = faltanEval(); if (f.length) return marcarFaltas(f);
   guardarTelDir();
-  S.contacto.localizado = 'Sí'; S.flujo = k; S.campos = {};
+  S.contacto.localizado = 'Sí'; S.flujo = k; S.campos = {}; S.paso = 0;
+  guardarContacto(k);
   $('#evalBody').innerHTML = '';   // evita ids repetidos entre evaluación y formulario
   renderForm(); go('form');
 }
+/* Registra en la base que el cliente sí se localizó, sin esperar a que se termine el formulario */
+function guardarContacto(k) {
+  const m = datosOS(), c = S.contacto;
+  S.folioContacto = S.folioContacto || genFolio();
+  const L = ['✅ *CLIENTE LOCALIZADO*', ...scriptBase(m), `*Teléfono donde se localizó*: ${c.tel || 'Sin dato'}`, `*Formulario*: ${FLUJOS[k].titulo}`, `*Fecha y hora*: ${fmtF(new Date())}`];
+  if (c.intentos.length) { L.push(`*Intentos de contacto (${c.intentos.length})*:`); c.intentos.forEach((x, i) => L.push(`${i + 1}) ${x}`)); }
+  const data = { folio: S.folioContacto, flujo: 'contacto', flujoTitulo: 'CLIENTE LOCALIZADO', os: m.os, cuenta: m.cuenta, base: m,
+    contacto: { localizado: 'Sí', tel: c.tel, intentos: c.intentos }, campos: [{ id: 'formulario', label: 'Formulario', valor: FLUJOS[k].titulo }],
+    fachada: null, equipos: [], series: [], cierre: null, fibra: null, comentarios: '', alertas: [], capturista: cfg.nombre,
+    dispositivo: navigator.userAgent.slice(0, 180), texto: L.join('\n') };
+  (demo() ? Promise.reject(new Error('sin servicio')) : api('guardar', {}, { data }))
+    .then(() => toast('📞 Contacto registrado en la base'))
+    .catch(() => pendPut(data).then(() => toast('📞 Contacto guardado en el teléfono; se subirá al haber conexión')).catch(() => {}));
+}
 async function guardarIloc() {
   const f = faltanEval(); if (!motivoTxt()) f.push([S.contacto.motivo === 'Otro' ? 'motivoOtro' : 'motivoNC', 'Motivo de no contacto']);
+  if (S.contacto.intentos.length < APP.ILOC_MIN_INTENTOS) f.push(['intentosBox', `${APP.ILOC_MIN_INTENTOS} intentos de contacto (llevas ${S.contacto.intentos.length})`]);
+  if (APP.ILOC_FOTO_OBLIGATORIA && !S.fachada) f.push(['fachadaBox', 'Foto de fachada']);
   if (f.length) return marcarFaltas(f);
   guardarTelDir();
   const m = datosOS(), texto = textoIloc();
   const data = { folio: S.folio, flujo: 'ilocalizable', flujoTitulo: 'CLIENTE ILOCALIZABLE', os: m.os, cuenta: m.cuenta, base: m,
-    contacto: { localizado: 'No', motivo: motivoTxt(), marcados: S.contacto.marcados.trim() },
+    contacto: { localizado: 'No', motivo: motivoTxt(), marcados: S.contacto.marcados.trim(), intentos: S.contacto.intentos },
     campos: [{ id: 'motivo', label: 'Motivo de no contacto', valor: motivoTxt() }].concat(S.contacto.marcados.trim() ? [{ id: 'marcados', label: 'Teléfonos marcados', valor: S.contacto.marcados.trim() }] : []),
     fachada: S.fachada ? metaFoto(S.fachada) : null, equipos: [], series: [], cierre: null, fibra: null,
     comentarios: S.comentarios.trim(), alertas: todasAlertas(), capturista: cfg.nombre, dispositivo: navigator.userAgent.slice(0, 180), texto };
@@ -1201,6 +1387,7 @@ document.addEventListener('input', e => {
   const t = e.target, c = S.contacto;
   if (t.dataset.m) { S.manual[t.dataset.m] = t.dataset.m === 'cuenta' || t.dataset.m === 'telTecnico' ? t.value.replace(/[^\d]/g, '') : t.value; if (t.value !== S.manual[t.dataset.m]) t.value = S.manual[t.dataset.m]; t.classList.remove('err'); }
   else if (t.id === 'telLoc') c.tel = t.value.trim();
+  else if (t.id === 'telCli') { c.telCliente = t.value; pintarAcciones(); }
   else if (t.id === 'motivoNC') { c.motivo = t.value; $('#motivoOtroBox').hidden = t.value !== 'Otro'; t.classList.remove('err'); }
   else if (t.id === 'motivoOtro') { c.motivoOtro = t.value; t.classList.remove('err'); }
   else if (t.id === 'telMarc') c.marcados = t.value;
@@ -1395,8 +1582,8 @@ async function subirBitacora() {
 }
 
 /* ======================== AJUSTES ======================== */
-function fillCfg() { $('#cfgNombre').value = cfg.nombre; $('#cfgWa').value = cfg.waNum; $('#cfgUrl').value = cfg.apiUrl; $('#cfgToken').value = cfg.token; $('#cfgMsg').innerHTML = ''; }
-function leerCfg() { cfg = { admin: cfg.admin, nombre: $('#cfgNombre').value.trim(), waNum: $('#cfgWa').value.trim(), apiUrl: $('#cfgUrl').value.trim(), token: $('#cfgToken').value.trim() }; LSset('d29_cfg', cfg); }
+function fillCfg() { $('#cfgTecnico').value = cfg.tecnico || ''; cargarTecnicos(); $('#cfgNombre').value = cfg.nombre; $('#cfgWa').value = cfg.waNum; $('#cfgUrl').value = cfg.apiUrl; $('#cfgToken').value = cfg.token; $('#cfgMsg').innerHTML = ''; }
+function leerCfg() { cfg = { admin: cfg.admin, tecnico: $('#cfgTecnico').value.trim(), nombre: $('#cfgNombre').value.trim(), waNum: $('#cfgWa').value.trim(), apiUrl: $('#cfgUrl').value.trim(), token: $('#cfgToken').value.trim() }; LSset('d29_cfg', cfg); }
 function urlValida(u) { return !u || /^https:\/\/script\.google\.com\/(a\/macros\/[^/]+|macros)\/s\/[\w-]{20,}\/exec\/?$/.test(u); }
 const CHECK_URL = `<div class="note warn" style="text-align:left">Revisa en Apps Script:<br>
   1. Ejecutaste la función <b>setup</b> y aceptaste los permisos (deben aparecer las pestañas Base_OS y Evidencias en la hoja).<br>
@@ -1414,22 +1601,108 @@ $('#btnPing').onclick = async () => {
   }
 };
 
+/* ======================== MIS OS DE HOY ======================== */
+let misDia = 0, misCache = {};
+function fechaClave(off) { const d = new Date(); d.setDate(d.getDate() + off); return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`; }
+async function renderMisOS(forzar) {
+  const el = $('#misCard'); if (!el) return;
+  if (!cfg.tecnico) { el.innerHTML = `<h3>📋 Mis OS de hoy</h3><p class="hint" style="margin:0">Si eres técnico, elige tu nombre en <a href="#" data-go="ajustes">⚙️ Ajustes</a> para ver aquí tus órdenes del día.</p>`; return; }
+  const f = fechaClave(misDia), k = cfg.tecnico + '|' + f;
+  const cab = `<h3>📋 Mis OS <span style="font-weight:600;color:var(--mute);font-size:13px">· ${esc(cfg.tecnico)}</span></h3>
+    <div class="seg" id="misSeg" style="margin-bottom:6px">${[[-1, 'Ayer'], [0, 'Hoy'], [1, 'Mañana']].map(([o, t]) => `<button data-mis="${o}" class="${o === misDia ? 'on' : ''}">${t}</button>`).join('')}</div>`;
+  const pintar = (r, nota) => {
+    const xs = (r.ordenes || []).slice().sort((a, b) => (fechaDe(a.fechaAsignacion) || 0) - (fechaDe(b.fechaAsignacion) || 0));
+    el.innerHTML = cab + (nota || '') + (xs.length ? xs.map(o => `<div class="item" data-mis-os="${esc(o.os)}">
+        <div class="t"><b>${esc(o.os)}</b><small>${esc([String(o.fechaAsignacion || '').split(' ')[1], o.tipo, o.subtipo].filter(Boolean).join(' · '))}</small><small>${esc(o.titular || '')}${o.estatus ? ' · ' + esc(o.estatus) : ''}</small></div>
+        <span class="st ${o.capturas && !/ILOCALIZABLE/i.test(o.ultimoFlujo || '') ? 'ok' : 'pen'}">${o.capturas ? (/ILOCALIZABLE/i.test(o.ultimoFlujo || '') ? '📵 ' : '✅ ') + esc(o.ultimoFlujo || 'Con evidencia') : '⏳ Pendiente'}</span></div>`).join('')
+      : `<p class="hint" style="margin:6px 0 0">No tienes OS con agenda el ${f}.</p>`)
+      + `<button class="btn ghost sm" style="margin-top:8px" data-act-mis="recargar">↻ Actualizar</button>`;
+  };
+  if (misCache[k] && !forzar) return pintar(misCache[k].r);
+  el.innerHTML = cab + `<p class="hint">Cargando tus OS…</p>`;
+  try {
+    const r = await api('misOS', { tecnico: cfg.tecnico, fecha: f });
+    misCache[k] = { r }; LSset('d29_mis', { k, r, t: Date.now() }); pintar(r);
+  } catch (e) {
+    const c = LSget('d29_mis');
+    if (c && c.k === k) pintar(c.r, `<div class="note warn">Sin conexión: se muestra la última lista guardada.</div>`);
+    else el.innerHTML = cab + `<div class="note err">${esc(e.message)}</div><button class="btn ghost sm" data-act-mis="recargar">↻ Reintentar</button>`;
+  }
+}
+document.addEventListener('click', e => {
+  const s = e.target.closest('[data-mis]'); if (s) { misDia = +s.dataset.mis; renderMisOS(); return; }
+  const o = e.target.closest('[data-mis-os]'); if (o) { setQModo('os'); $('#qIn').value = o.dataset.misOs.replace(/\D/g, ''); consultar(); return; }
+  const r = e.target.closest('[data-act-mis="recargar"]'); if (r) renderMisOS(true);
+});
+async function cargarTecnicos() {
+  const dl = $('#dlTecnicos'); if (!dl || demo()) return;
+  try { const r = await api('tecnicos'); dl.innerHTML = (r.tecnicos || []).map(t => `<option value="${esc(t)}">`).join(''); } catch (e) {}
+}
+async function cargarConfig() {
+  if (demo()) return;
+  try { const r = await api('config'); if (r.formularios) LSset('d29_formularios', r.formularios); } catch (e) {}
+}
+
+/* ======================== APP INSTALABLE ======================== */
+let instalarEvt = null;
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); instalarEvt = e; $('#btnInstalar').hidden = false; });
+$('#btnInstalar').onclick = async () => { if (!instalarEvt) return; instalarEvt.prompt(); try { await instalarEvt.userChoice; } catch (e) {} instalarEvt = null; $('#btnInstalar').hidden = true; };
+window.addEventListener('appinstalled', () => { $('#btnInstalar').hidden = true; toast('✅ App instalada'); });
+
 /* ======================== PENDIENTES (sin conexión) ======================== */
 let _db = null;
 function pdb() {
   return _db || (_db = new Promise((res, rej) => {
-    const r = indexedDB.open('d29_evidencias', 1);
-    r.onupgradeneeded = () => r.result.createObjectStore('pend', { keyPath: 'folio' });
+    const r = indexedDB.open('d29_evidencias', 2);
+    r.onupgradeneeded = () => {
+      const db = r.result;
+      if (!db.objectStoreNames.contains('pend')) db.createObjectStore('pend', { keyPath: 'folio' });
+      if (!db.objectStoreNames.contains('borrador')) db.createObjectStore('borrador', { keyPath: 'id' });
+    };
     r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
   }));
 }
-async function pendTx(mode, fn) {
+async function pendTx(mode, fn, store = 'pend') {
   const db = await pdb();
-  return new Promise((res, rej) => { const t = db.transaction('pend', mode), q = fn(t.objectStore('pend')); t.oncomplete = () => res(q && q.result); t.onerror = () => rej(t.error); });
+  return new Promise((res, rej) => { const t = db.transaction(store, mode), q = fn(t.objectStore(store)); t.oncomplete = () => res(q && q.result); t.onerror = () => rej(t.error); });
 }
 const pendPut = d => pendTx('readwrite', s => s.put(d));
 const pendDel = k => pendTx('readwrite', s => s.delete(k));
 const pendAll = () => pendTx('readonly', s => s.getAll()).then(x => x || []).catch(() => []);
+/* ---- Borrador automático de la captura en curso ---- */
+let borradorInfo = null, borrTimer = null;
+function guardarBorrador() {
+  clearTimeout(borrTimer);
+  borrTimer = setTimeout(async () => {
+    if (!S || !(cur === 'eval' || cur === 'form')) return;
+    const rec = { id: 'actual', S, vista: cur, hist: histActual, ts: Date.now() };
+    try { await pendTx('readwrite', st => st.put(rec), 'borrador'); borradorInfo = { osDig: S.osDig, flujo: S.flujo, ts: rec.ts }; } catch (e) {}
+  }, 500);
+}
+async function leerBorrador() { try { return await pendTx('readonly', st => st.get('actual'), 'borrador'); } catch (e) { return null; } }
+async function borrarBorrador() { clearTimeout(borrTimer); borradorInfo = null; try { await pendTx('readwrite', st => st.delete('actual'), 'borrador'); } catch (e) {} pintarBorrador(); }
+async function pintarBorrador() {
+  const el = $('#draftNote'); if (!el) return;
+  const d = await leerBorrador();
+  borradorInfo = d ? { osDig: d.S.osDig, flujo: d.S.flujo, ts: d.ts } : null;
+  if (!d) { el.innerHTML = ''; return; }
+  const min = Math.max(0, Math.round((Date.now() - d.ts) / 60000));
+  const que = d.S.flujo === 'evaluacion' ? 'Evaluación' : ((FLUJOS[d.S.flujo] || {}).titulo || d.S.flujo);
+  const fotos = [d.S.fachada, d.S.cierre, ...(d.S.equipos || [])].filter(Boolean).length;
+  el.innerHTML = `<div class="note warn" style="margin-bottom:10px">📝 Captura sin terminar: <b>OS-${esc(d.S.osDig)}</b> · ${esc(que)}${fotos ? ` · ${fotos} foto${fotos === 1 ? '' : 's'}` : ''} · hace ${min < 60 ? min + ' min' : Math.round(min / 60) + ' h'}
+    <div class="row"><button class="btn sm" id="btnDraftOk">Continuar captura</button><button class="btn ghost sm" id="btnDraftNo">Descartar</button></div></div>`;
+  $('#btnDraftOk').onclick = () => restaurarBorrador(d);
+  $('#btnDraftNo').onclick = () => { if (confirm('¿Descartar la captura sin terminar? Se perderán sus fotos.')) { if (S && S.osDig === d.S.osDig) S = null; borrarBorrador(); } };
+}
+function restaurarBorrador(d) {
+  S = d.S; histActual = d.hist || null;
+  if (S.base) ordenesVistas['OS-' + S.osDig] = S.base;
+  if (d.vista === 'form') { renderForm(); go('form'); } else go('eval');
+}
+['input', 'change'].forEach(ev => document.addEventListener(ev, () => { if (S && (cur === 'eval' || cur === 'form')) guardarBorrador(); }));
+document.addEventListener('click', () => { if (S && (cur === 'eval' || cur === 'form')) guardarBorrador(); });
+
 async function pintarPendientes() {
   const el = $('#pendNote'); if (!el) return;
   const n = (await pendAll()).length;
@@ -1485,7 +1758,8 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 history.replaceState({ v: 'home' }, '', '#home');
 go('home', false);
 recuperarDemo().then(() => { pintarPendientes(); setTimeout(() => sincronizar(), 1200); });
-window.addEventListener('beforeunload', e => { if (cur === 'form' && dirty()) { e.preventDefault(); e.returnValue = ''; } });
+cargarConfig();
+
 </script>
 </body>
 </html>
